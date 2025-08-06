@@ -8,9 +8,16 @@
   <link rel="stylesheet" href="styles.css" />
   <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
   <script>
-    const INFURA_URL = "https://mainnet.infura.io/v3/29c4acc1a97c4d9da48abab219ec7e24";
-    let web3 = new Web3(new Web3.providers.HttpProvider(INFURA_URL));
-  </script>
+  const INFURA_URL = "https://mainnet.infura.io/v3/29c4acc1a97c4d9da48abab219ec7e24";
+  let web3 = new Web3(new Web3.providers.HttpProvider(INFURA_URL));
+
+  // ✅ Validación: obtener el número de bloque actual
+  web3.eth.getBlockNumber().then(num => {
+    console.log("✅ Conectado a Infura. Último bloque:", num);
+  }).catch(err => {
+    console.error("❌ Error al conectar con Infura:", err);
+  });
+</script>
 </head>
 <body>
   <div class="language-switcher" style="position: absolute; top: 20px; right: 20px;">
