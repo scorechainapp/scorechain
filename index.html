@@ -19,6 +19,22 @@
   });
 </script>
 </head>
+<script>
+  document.getElementById('connectWalletBtn').addEventListener('click', async () => {
+    if (typeof window.ethereum !== 'undefined') {
+      try {
+        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+        const address = accounts[0];
+        document.getElementById('walletAddress').textContent = `✅ Conectado: ${address}`;
+      } catch (err) {
+        document.getElementById('walletAddress').textContent = '❌ Error al conectar.';
+        console.error(err);
+      }
+    } else {
+      alert("🚫 MetaMask no está instalada. Descárgala desde https://metamask.io");
+    }
+  });
+</script>
 <body>
   <div class="language-switcher" style="position: absolute; top: 20px; right: 20px;">
     <select id="lang-selector">
@@ -34,6 +50,8 @@
     </div>
 
     <div class="score-number">76 / 100</div>
+	<div id="wallet-connection" style="margin-top: 15px;">
+</div>
     <div class="bar-container"></div>
     <p id="score-info" style="font-size: 12px; color: #aaa; margin-bottom: 10px;"></p>
     <p data-es="Portafolio razonablemente equilibrado" data-en="Reasonably balanced portfolio">Portafolio razonablemente equilibrado</p>
@@ -65,6 +83,8 @@
          data-en="Updated with real-time data from CoinGecko.">
          Actualizado con datos de CoinGecko en tiempo real.
     </div>
+	<button id="connect-wallet" data-es="🔌 Conectar Wallet" data-en="🔌 Connect Wallet">🔌 Conectar Wallet</button>
+<p id="walletAddress" data-es="" data-en=""></p>
 
     <div class="footer">
       <span data-es="Para mejorar tu score, considera diversificar más tu portafolio y reducir tu exposición a activos de mayor riesgo." 
@@ -87,6 +107,48 @@
       });
     });
   </script>
+  <script>
+  const connectButton = document.getElementById('connect-wallet');
+  const walletDisplay = document.getElementById('wallet-address');
+
+  async function connectWallet() {
+    if (typeof window.ethereum !== 'undefined') {
+      try {
+        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+        const wallet = accounts[0];
+        walletDisplay.textContent = `Wallet conectada: ${wallet.slice(0, 6)}...${wallet.slice(-4)}`;
+      } catch (err) {
+        console.error("Error al conectar con MetaMask", err);
+      }
+    } else {
+      alert('MetaMask no está instalada');
+    }
+  }
+
+  connectButton.addEventListener('click', connectWallet);
+</script>
   <script src="script.js"></script>
+  <script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const connectBtn = document.getElementById("connect-wallet");
+
+    if (!connectBtn) return;
+
+    connectBtn.addEventListener("click", async () => {
+      if (typeof window.ethereum !== 'undefined') {
+        try {
+          const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+          const address = accounts[0];
+          console.log("✅ Wallet conectada:", address);
+          connectBtn.textContent = "✅ Wallet conectada";
+        } catch (err) {
+          console.error("❌ Error al conectar con MetaMask:", err.message);
+        }
+      } else {
+        alert("MetaMask no está instalada. Instálala para continuar.");
+      }
+    });
+  });
+</script>
 </body>
 </html>
