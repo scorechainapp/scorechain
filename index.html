@@ -1,0 +1,85 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ScoreChain</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+  <script>
+    const INFURA_URL = "https://mainnet.infura.io/v3/29c4acc1a97c4d9da48abab219ec7e24";
+    let web3 = new Web3(new Web3.providers.HttpProvider(INFURA_URL));
+  </script>
+</head>
+<body>
+  <div class="language-switcher" style="position: absolute; top: 20px; right: 20px;">
+    <select id="lang-selector">
+      <option value="es">🌐 Español</option>
+      <option value="en">🌐 English</option>
+    </select>
+  </div>
+
+  <div class="card">
+    <div class="logo">
+      <img src="./assets/logos/scorechain.png" alt="ScoreChain">
+      <span class="score-title" data-es="Score Financiero" data-en="Financial Score">Score Financiero</span>
+    </div>
+
+    <div class="score-number">76 / 100</div>
+    <div class="bar-container"></div>
+    <p id="score-info" style="font-size: 12px; color: #aaa; margin-bottom: 10px;"></p>
+    <p data-es="Portafolio razonablemente equilibrado" data-en="Reasonably balanced portfolio">Portafolio razonablemente equilibrado</p>
+
+    <div class="portfolio">
+      <div class="portfolio-item">
+        <div class="asset-info"><img src="./assets/logos/bitcoin.png" alt="BTC">Bitcoin</div>
+        <div>40% <span class="risk-low" data-es="Riesgo: Bajo" data-en="Risk: Low">Riesgo: Bajo</span></div>
+      </div>
+      <div class="portfolio-item">
+        <div class="asset-info"><img src="./assets/logos/ethereum.png" alt="ETH">Ethereum</div>
+        <div>25% <span class="risk-low" data-es="Riesgo: Bajo" data-en="Risk: Low">Riesgo: Bajo</span></div>
+      </div>
+      <div class="portfolio-item">
+        <div class="asset-info"><img src="./assets/logos/solana.png" alt="SOL">Solana</div>
+        <div>15% <span class="risk-mid" data-es="Riesgo: Moderado" data-en="Risk: Moderate">Riesgo: Moderado</span></div>
+      </div>
+      <div class="portfolio-item">
+        <div class="asset-info"><img src="./assets/logos/usdc.png" alt="USDC">USD Coin</div>
+        <div>10% <span class="risk-low" data-es="Riesgo: Bajo" data-en="Risk: Low">Riesgo: Bajo</span></div>
+      </div>
+      <div class="portfolio-item">
+        <div class="asset-info"><img src="./assets/logos/bnb.png" alt="BNB">BNB</div>
+        <div>10% <span class="risk-low" data-es="Riesgo: Bajo" data-en="Risk: Low">Riesgo: Bajo</span></div>
+      </div>
+    </div>
+
+    <div class="coingecko-msg" data-es="Actualizado con datos de CoinGecko en tiempo real." 
+         data-en="Updated with real-time data from CoinGecko.">
+         Actualizado con datos de CoinGecko en tiempo real.
+    </div>
+
+    <div class="footer">
+      <span data-es="Para mejorar tu score, considera diversificar más tu portafolio y reducir tu exposición a activos de mayor riesgo." 
+            data-en="To improve your score, consider further diversifying your portfolio and reducing exposure to higher-risk assets.">
+        Para mejorar tu score, considera diversificar más tu portafolio y reducir tu exposición a activos de mayor riesgo.
+      </span><br>
+      © <span id="year"></span> ScoreChain · 
+      <a href="privacy.html" data-es="Política de Privacidad" data-en="Privacy Policy">Política de Privacidad</a> · 
+      <a href="terms.html" data-es="Términos" data-en="Terms">Términos</a>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById("year").textContent = new Date().getFullYear();
+
+    document.getElementById('lang-selector').addEventListener('change', (e) => {
+      const lang = e.target.value;
+      document.querySelectorAll('[data-es]').forEach(el => {
+        el.textContent = el.getAttribute(`data-${lang}`);
+      });
+    });
+  </script>
+  <script src="script.js"></script>
+</body>
+</html>

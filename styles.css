@@ -1,0 +1,83 @@
+
+body {
+  margin: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #0b1120;
+  color: #ffffff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+.card {
+  background-color: #111827;
+  padding: 40px;
+  border-radius: 12px;
+  max-width: 600px;
+  width: 90%;
+  box-shadow: 0 0 20px rgba(0,0,0,0.2);
+}
+.logo {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+}
+.logo img {
+  width: 32px;
+  margin-right: 10px;
+}
+.score-title {
+  font-size: 24px;
+  font-weight: bold;
+}
+.score-number {
+  font-size: 32px;
+  font-weight: bold;
+  margin: 10px 0;
+}
+.bar-container {
+  height: 12px;
+  border-radius: 6px;
+  background: linear-gradient(to right, #00cfc1 0%, #ffce3d 50%, #ff4d4d 100%);
+  margin-bottom: 10px;
+}
+.portfolio {
+  margin-top: 30px;
+}
+.portfolio-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #2a2a3d;
+  padding: 10px 0;
+}
+.portfolio-item:last-child {
+  border: none;
+}
+.asset-info {
+  display: flex;
+  align-items: center;
+}
+.asset-info img {
+  width: 24px;
+  margin-right: 10px;
+}
+.risk-low { color: #00ff88; }
+.risk-mid { color: #ffce3d; }
+.footer {
+  margin-top: 30px;
+  font-size: 12px;
+  color: #ccc;
+  text-align: center;
+}
+.footer a {
+  color: #ccc;
+  text-decoration: underline;
+  margin: 0 5px;
+}
+.coingecko-msg {
+  font-size: 12px;
+  color: #66c2ff;
+  margin-top: 15px;
+  text-align: center;
+}
