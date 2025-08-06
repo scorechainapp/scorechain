@@ -85,6 +85,8 @@
     </div>
 	<button id="connect-wallet" data-es="🔌 Conectar Wallet" data-en="🔌 Connect Wallet">🔌 Conectar Wallet</button>
 <p id="walletAddress" data-es="" data-en=""></p>
+<button id="switch-base" data-es="🌐 Cambiar a Base" data-en="🌐 Switch to Base">🌐 Cambiar a Base</button>
+<p id="base-msg" data-es="" data-en=""></p>
 
     <div class="footer">
       <span data-es="Para mejorar tu score, considera diversificar más tu portafolio y reducir tu exposición a activos de mayor riesgo." 
@@ -149,6 +151,122 @@
       }
     });
   });
+  <script>
+  const baseParams = {
+    chainId: '0x2105', // Base Mainnet
+    chainName: 'Base Mainnet',
+    nativeCurrency: {
+      name: 'Ether',
+      symbol: 'ETH',
+      decimals: 18
+    },
+    rpcUrls: ['https://mainnet.base.org'],
+    blockExplorerUrls: ['https://basescan.org']
+  };
+
+  const baseMsg = document.getElementById("base-msg");
+
+  document.getElementById("switch-base").addEventListener("click", async () => {
+    if (typeof window.ethereum !== 'undefined') {
+      try {
+        await window.ethereum.request({
+          method: 'wallet_addEthereumChain',
+          params: [baseParams]
+        });
+        baseMsg.setAttribute("data-es", "✅ Conectado a la red Base.");
+        baseMsg.setAttribute("data-en", "✅ Connected to Base network.");
+        const lang = document.getElementById("lang-selector").value;
+        baseMsg.textContent = baseMsg.getAttribute(`data-${lang}`);
+      } catch (err) {
+        console.error(err);
+        baseMsg.setAttribute("data-es", "❌ Error al cambiar a Base.");
+        baseMsg.setAttribute("data-en", "❌ Failed to switch to Base.");
+        const lang = document.getElementById("lang-selector").value;
+        baseMsg.textContent = baseMsg.getAttribute(`data-${lang}`);
+      }
+    } else {
+      baseMsg.setAttribute("data-es", "❌ MetaMask no está instalada.");
+      baseMsg.setAttribute("data-en", "❌ MetaMask is not installed.");
+      const lang = document.getElementById("lang-selector").value;
+      baseMsg.textContent = baseMsg.getAttribute(`data-${lang}`);
+    }
+  });
+
+  // Traducir textos dinámicos al cambiar idioma
+  document.getElementById('lang-selector').addEventListener('change', (e) => {
+    const lang = e.target.value;
+    document.querySelectorAll('[data-es]').forEach(el => {
+      el.textContent = el.getAttribute(`data-${lang}`);
+    });
+  });
+</script>
+<script>
+  const langSelector = document.getElementById('lang-selector');
+
+  function getLang() {
+    return langSelector ? langSelector.value : 'es';
+  }
+
+  function translate(msgs) {
+    const lang = getLang();
+    return msgs[lang] || msgs['es'];
+  }
+
+  async function switchToBaseAndConnect() {
+    if (typeof window.ethereum === 'undefined') {
+      alert(translate({
+        es: "MetaMask no está instalada. Por favor instálala para continuar.",
+        en: "MetaMask is not installed. Please install it to continue."
+      }));
+      return;
+    }
+
+    try {
+      // Conectar la wallet si no está conectada
+      const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
+
+      // Cambiar a la red Base
+      await ethereum.request({
+        method: 'wallet_switchEthereumChain',
+        params: [{ chainId: '0x2105' }] // 8451 en decimal
+      });
+
+      const address = accounts[0];
+      document.getElementById('walletAddress').textContent = translate({
+        es: "✅ Wallet conectada: ",
+        en: "✅ Wallet connected: "
+      }) + address;
+
+    } catch (switchError) {
+      // Si la red Base no está añadida, la añadimos
+      if (switchError.code === 4902) {
+        try {
+          await ethereum.request({
+            method: 'wallet_addEthereumChain',
+            params: [{
+              chainId: '0x2105',
+              chainName: 'Base',
+              rpcUrls: ['https://mainnet.base.org'],
+              nativeCurrency: {
+                name: 'Ethereum',
+                symbol: 'ETH',
+                decimals: 18
+              },
+              blockExplorerUrls: ['https://basescan.org']
+            }]
+          });
+        } catch (addError) {
+          console.error("Error al añadir la red Base:", addError);
+        }
+      } else {
+        console.error("Error al cambiar de red:", switchError);
+      }
+    }
+  }
+
+  // Vincular al botón
+  document.getElementById('switch-base').addEventListener('click', switchToBaseAndConnect);
+</script>
 </script>
 </body>
 </html>
