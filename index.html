@@ -231,11 +231,11 @@
         params: [{ chainId: '0x2105' }] // 8451 en decimal
       });
 
-      const address = accounts[0];
-      document.getElementById('walletAddress').textContent = translate({
-        es: "✅ Wallet conectada: ",
-        en: "✅ Wallet connected: "
-      }) + address;
+      const shortAddress = address.slice(0, 6) + "..." + address.slice(-4);
+document.getElementById('walletAddress').textContent = translate({
+  es: "✅ Wallet conectada: ",
+  en: "✅ Wallet connected: "
+}) + shortAddress;
 
     } catch (switchError) {
       // Si la red Base no está añadida, la añadimos
