@@ -109,6 +109,29 @@
       });
     });
   </script>
+  <script>
+  const connectButton = document.getElementById('connect-wallet');
+  const walletDisplay = document.getElementById('wallet-address');
+
+  async function connectWallet() {
+    if (window.ethereum) {
+      try {
+        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+        const wallet = accounts[0];
+       // ✅ Aquí es donde debes guardar y formatear la dirección
+      setWallet(formatAddress(wallet)); // ejemplo: 0x123...abcd
+      setConnected(true);
+      toast.success('Wallet conectada');
+
+    } catch (error) {
+      console.error(error);
+      toast.error('Error al conectar wallet');
+    }
+  } else {
+    toast.error('MetaMask no detectado');
+  }
+}
+
   connectButton.addEventListener('click', connectWallet);
 </script>
   <script src="script.js"></script>
@@ -134,12 +157,7 @@
     });
   });
   <script>
-	  <script>
-  function formatAddress(address) {
-    return address.slice(0, 6) + "..." + address.slice(-4);
-  }
-</script>
- const baseParams = {
+  const baseParams = {
     chainId: '0x2105', // Base Mainnet
     chainName: 'Base Mainnet',
     nativeCurrency: {
