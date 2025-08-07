@@ -114,18 +114,23 @@
   const walletDisplay = document.getElementById('wallet-address');
 
   async function connectWallet() {
-    if (typeof window.ethereum !== 'undefined') {
+    if (window.ethereum) {
       try {
         const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-        const wallet = accounts[0];
-        walletDisplay.textContent = `Wallet conectada: ${wallet.slice(0, 6)}...${wallet.slice(-4)}`;
-      } catch (err) {
-        console.error("Error al conectar con MetaMask", err);
-      }
-    } else {
-      alert('MetaMask no está instalada');
+        const accounts = accounts[0];
+       // ✅ Aquí es donde debes guardar y formatear la dirección
+      setWallet(formatAddress(account)); // ejemplo: 0x123...abcd
+      setConnected(true);
+      toast.success('Wallet conectada');
+
+    } catch (error) {
+      console.error(error);
+      toast.error('Error al conectar wallet');
     }
+  } else {
+    toast.error('MetaMask no detectado');
   }
+}
 
   connectButton.addEventListener('click', connectWallet);
 </script>
@@ -140,7 +145,7 @@
       if (typeof window.ethereum !== 'undefined') {
         try {
           const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-          const address = accounts[0];
+          const accounts = accounts[0];
           console.log("✅ Wallet conectada:", address);
           connectBtn.textContent = "✅ Wallet conectada";
         } catch (err) {
