@@ -20,7 +20,7 @@
 </script>
 </head>
 <script>
-  document.getElementById('connectWalletBtn').addEventListener('click', async () => {
+  document.getElementById('connectWallet').addEventListener('click', async () => {
     if (typeof window.ethereum !== 'undefined') {
       try {
         const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
