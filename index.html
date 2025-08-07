@@ -119,7 +119,7 @@
         const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
         const wallet = accounts[0];
        // ✅ Aquí es donde debes guardar y formatear la dirección
-      setWallet(formatAddress(account)); // ejemplo: 0x123...abcd
+      setWallet(formatAddress(wallet)); // ejemplo: 0x123...abcd
       setConnected(true);
       toast.success('Wallet conectada');
 
