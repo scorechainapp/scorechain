@@ -117,7 +117,7 @@
     if (window.ethereum) {
       try {
         const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-        const accounts = accounts[0];
+        const wallet = accounts[0];
        // ✅ Aquí es donde debes guardar y formatear la dirección
       setWallet(formatAddress(account)); // ejemplo: 0x123...abcd
       setConnected(true);
@@ -145,7 +145,7 @@
       if (typeof window.ethereum !== 'undefined') {
         try {
           const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-          const accounts = accounts[0];
+          const address = accounts[0];
           console.log("✅ Wallet conectada:", address);
           connectBtn.textContent = "✅ Wallet conectada";
         } catch (err) {
