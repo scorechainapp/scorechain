@@ -19,6 +19,8 @@
   });
 </script>
 </head>
+	// config/networks.ts
+export const SUPPORTED_NETWORKS = ["devnet"];
 <script>
   document.getElementById('connectWallet').addEventListener('click', async () => {
     if (typeof window.ethereum !== 'undefined') {
