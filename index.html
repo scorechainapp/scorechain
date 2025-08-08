@@ -1,217 +1,399 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>ScoreChain</title>
-  <link rel="stylesheet" href="styles.css" />
-  <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #0d0d0d;
-      color: white;
-      margin: 0;
-      padding: 0;
+    :root{
+      --bg:#0b0f1a;
+      --card:#0f1724;
+      --muted:#9aa4b2;
+      --accent:#00cfc1;
+      --accent-2:#ffce3d;
+      --danger:#ff4d4d;
+      --glass: rgba(255,255,255,0.03);
     }
-    .card {
-      max-width: 800px;
-      margin: 50px auto;
-      background: #1a1a1a;
-      border-radius: 15px;
-      padding: 20px;
-      box-shadow: 0 0 20px rgba(0,0,0,0.5);
+    html,body{height:100%;margin:0;background:var(--bg);font-family:Inter,system-ui,Segoe UI,Roboto,Arial; color:#e6eef8}
+    .wrap{max-width:980px;margin:28px auto;padding:18px}
+    .card{
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border-radius:14px;padding:20px;box-shadow:0 10px 30px rgba(2,6,23,0.6);border:1px solid rgba(255,255,255,0.03);
     }
-    .dashboard-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 15px;
+
+    /* header */
+    .hdr{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}
+    .brand{display:flex;align-items:center;gap:12px}
+    .brand img{width:44px;height:44px;border-radius:8px;background:#000;padding:6px}
+    .brand .title{font-size:18px;font-weight:700}
+    .controls{display:flex;gap:10px;align-items:center}
+
+    /* globe selector */
+    .lang-select{
+      display:flex;align-items:center;gap:8px;background:var(--glass);padding:6px 10px;border-radius:999px;border:1px solid rgba(255,255,255,0.03);
     }
-    .buttons {
-      display: flex;
-      gap: 10px;
+    .lang-select select{background:transparent;border:0;color:#e6eef8;font-weight:600;outline:none}
+
+    /* header buttons */
+    .btn{background:linear-gradient(180deg,var(--accent),#00b2a9);color:#031018;padding:8px 12px;border-radius:10px;border:0;font-weight:700;cursor:pointer}
+    .btn.secondary{background:linear-gradient(180deg,var(--accent-2),#ebb53b);color:#081014}
+    .wallet-status{font-size:13px;color:var(--muted);margin-left:8px}
+
+    /* content layout */
+    .grid{display:grid;grid-template-columns:1fr 340px;gap:18px;align-items:start}
+    .left{min-height:220px}
+    .right{min-height:220px}
+
+    /* score area */
+    .score-box{background:rgba(255,255,255,0.02);padding:16px;border-radius:12px;margin-bottom:14px}
+    .score-title{font-size:14px;color:var(--muted);margin-bottom:6px}
+    .score-number{font-weight:800;font-size:32px;letter-spacing:0.6px}
+    .score-bar{height:12px;border-radius:999px;background:linear-gradient(90deg,var(--accent) 0%, var(--accent-2) 50%, var(--danger) 100%); margin-top:12px;box-shadow:0 4px 12px rgba(2,6,23,0.6)}
+
+    /* portfolio list */
+    .portfolio{margin-top:12px;display:flex;flex-direction:column;gap:10px}
+    .portfolio-item{
+      display:grid;
+      grid-template-columns: 1fr 90px 80px; /* name | price | percent */
+      gap:10px;align-items:center;padding:10px;border-radius:10px;background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.02)
     }
-    button {
-      background: #0066ff;
-      border: none;
-      padding: 10px 15px;
-      border-radius: 8px;
-      color: white;
-      cursor: pointer;
-      font-size: 14px;
-    }
-    button:hover {
-      background: #0044aa;
-    }
-    .portfolio {
-      margin-top: 20px;
-    }
-    .portfolio-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: #262626;
-      padding: 10px;
-      border-radius: 10px;
-      margin-bottom: 10px;
-    }
-    .asset-info {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .asset-info img {
-      width: 25px;
-      height: 25px;
-    }
-    .asset-price {
-      background: #333;
-      padding: 4px 8px;
-      border-radius: 6px;
-      font-size: 14px;
-    }
-    .footer {
-      margin-top: 20px;
-      font-size: 12px;
-      color: #aaa;
+    .asset-info{display:flex;gap:10px;align-items:center}
+    .asset-info img{width:28px;height:28px;border-radius:6px}
+    .asset-name{font-weight:700}
+    .asset-price{text-align:right;font-weight:700}
+    .asset-percent{text-align:right;color:var(--muted);font-weight:700}
+
+    .coingecko-msg{margin-top:12px;font-size:13px;color:var(--muted)}
+    .footer{margin-top:16px;font-size:13px;color:var(--muted);text-align:center}
+
+    /* responsive */
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr; }
+      .right{order:2}
     }
   </style>
 </head>
 <body>
-
-  <div class="card">
-
-    <!-- Header con logo y botones -->
-    <div class="dashboard-header">
-      <div class="logo">
-        <img src="./assets/logos/scorechain.png" alt="ScoreChain" style="height:40px;">
-        <span class="score-title" data-es="Score Financiero" data-en="Financial Score">Score Financiero</span>
-      </div>
-      <div class="buttons">
-        <button id="connect-wallet" data-es="🔌 Conectar Wallet" data-en="🔌 Connect Wallet">🔌 Conectar Wallet</button>
-        <button id="switch-base" data-es="🔄 Cambiar a Base" data-en="🔄 Switch to Base">🔄 Cambiar a Base</button>
-      </div>
-    </div>
-
-    <p id="walletAddress" data-es="" data-en=""></p>
-
-    <!-- Score -->
-    <div class="score-number">76 / 100</div>
-    <div class="bar-container"></div>
-    <p data-es="Portafolio razonablemente equilibrado" data-en="Reasonably balanced portfolio">Portafolio razonablemente equilibrado</p>
-
-    <!-- Portafolio con precios separados -->
-    <div class="portfolio">
-      <div class="portfolio-item">
-        <div class="asset-info">
-          <img src="./assets/logos/bitcoin.png" alt="BTC">Bitcoin
+  <div class="wrap">
+    <div class="card">
+      <!-- header -->
+      <div class="hdr">
+        <div class="brand">
+          <img src="./assets/logos/scorechain.png" alt="ScoreChain logo" id="logo-img" />
+          <div>
+            <div class="title">
+              <span data-es="Score Financiero" data-en="Financial Score">Score Financiero</span>
+            </div>
+            <div style="font-size:12px;color:var(--muted)" id="small-sub" data-es="Tu guía en cripto" data-en="Your crypto guide">Tu guía en cripto</div>
+          </div>
         </div>
-        <div class="asset-price" id="btc-price">$0</div>
-        <div>40% <span class="risk-low" data-es="Riesgo: Bajo" data-en="Risk: Low">Riesgo: Bajo</span></div>
-      </div>
-      <div class="portfolio-item">
-        <div class="asset-info">
-          <img src="./assets/logos/ethereum.png" alt="ETH">Ethereum
-        </div>
-        <div class="asset-price" id="eth-price">$0</div>
-        <div>25% <span class="risk-low" data-es="Riesgo: Bajo" data-en="Risk: Low">Riesgo: Bajo</span></div>
-      </div>
-      <div class="portfolio-item">
-        <div class="asset-info">
-          <img src="./assets/logos/solana.png" alt="SOL">Solana
-        </div>
-        <div class="asset-price" id="sol-price">$0</div>
-        <div>15% <span class="risk-mid" data-es="Riesgo: Moderado" data-en="Risk: Moderate">Riesgo: Moderado</span></div>
-      </div>
-      <div class="portfolio-item">
-        <div class="asset-info">
-          <img src="./assets/logos/usdc.png" alt="USDC">USD Coin
-        </div>
-        <div class="asset-price" id="usdc-price">$0</div>
-        <div>10% <span class="risk-low" data-es="Riesgo: Bajo" data-en="Risk: Low">Riesgo: Bajo</span></div>
-      </div>
-      <div class="portfolio-item">
-        <div class="asset-info">
-          <img src="./assets/logos/bnb.png" alt="BNB">BNB
-        </div>
-        <div class="asset-price" id="bnb-price">$0</div>
-        <div>10% <span class="risk-low" data-es="Riesgo: Bajo" data-en="Risk: Low">Riesgo: Bajo</span></div>
-      </div>
-    </div>
 
-    <div class="coingecko-msg" data-es="Actualizado con datos de CoinGecko en tiempo real." 
-         data-en="Updated with real-time data from CoinGecko.">
-         Actualizado con datos de CoinGecko en tiempo real.
-    </div>
+        <div class="controls">
+          <!-- language globe -->
+          <div class="lang-select" title="Change language">
+            <span>🌐</span>
+            <select id="lang-selector" aria-label="language">
+              <option value="es">Español</option>
+              <option value="en">English</option>
+            </select>
+          </div>
 
-    <div class="footer">
-      © <span id="year"></span> ScoreChain · 
-      <a href="privacy.html" data-es="Política de Privacidad" data-en="Privacy Policy">Política de Privacidad</a> · 
-      <a href="terms.html" data-es="Términos" data-en="Terms">Términos</a>
+          <!-- wallet actions -->
+          <div style="display:flex;align-items:center;gap:8px">
+            <button class="btn" id="connect-wallet" data-es="🔌 Conectar Wallet" data-en="🔌 Connect Wallet">🔌 Conectar Wallet</button>
+            <button class="btn secondary" id="switch-base" data-es="🔄 Cambiar a Base" data-en="🔄 Switch to Base">🔄 Cambiar a Base</button>
+            <div class="wallet-status" id="walletAddress" aria-live="polite"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- content -->
+      <div class="grid">
+        <!-- left -->
+        <div class="left">
+          <div class="score-box">
+            <div class="score-title" data-es="Score Financiero" data-en="Financial Score">Score Financiero</div>
+            <div class="score-number" id="score-number">76 / 100</div>
+            <div class="score-bar" id="score-bar" role="progressbar" aria-valuenow="76" aria-valuemin="0" aria-valuemax="100"></div>
+            <div style="margin-top:8px;font-size:13px;color:var(--muted)" id="score-desc" data-es="Portafolio razonablemente equilibrado" data-en="Reasonably balanced portfolio">Portafolio razonablemente equilibrado</div>
+          </div>
+
+          <!-- portfolio list -->
+          <div class="portfolio" id="portfolio">
+            <div class="portfolio-item">
+              <div class="asset-info"><img src="./assets/logos/bitcoin.png" alt="BTC"><div><div class="asset-name">Bitcoin</div><div style="font-size:12px;color:var(--muted)">BTC</div></div></div>
+              <div class="asset-price" id="btc-price">$0</div>
+              <div class="asset-percent"><span>40%</span><div style="font-size:11px;color:var(--muted)" data-es="Riesgo: Bajo" data-en="Risk: Low">Riesgo: Bajo</div></div>
+            </div>
+
+            <div class="portfolio-item">
+              <div class="asset-info"><img src="./assets/logos/ethereum.png" alt="ETH"><div><div class="asset-name">Ethereum</div><div style="font-size:12px;color:var(--muted)">ETH</div></div></div>
+              <div class="asset-price" id="eth-price">$0</div>
+              <div class="asset-percent"><span>25%</span><div style="font-size:11px;color:var(--muted)" data-es="Riesgo: Bajo" data-en="Risk: Low">Riesgo: Bajo</div></div>
+            </div>
+
+            <div class="portfolio-item">
+              <div class="asset-info"><img src="./assets/logos/solana.png" alt="SOL"><div><div class="asset-name">Solana</div><div style="font-size:12px;color:var(--muted)">SOL</div></div></div>
+              <div class="asset-price" id="sol-price">$0</div>
+              <div class="asset-percent"><span>15%</span><div style="font-size:11px;color:var(--muted)" data-es="Riesgo: Moderado" data-en="Risk: Moderate">Riesgo: Moderado</div></div>
+            </div>
+
+            <div class="portfolio-item">
+              <div class="asset-info"><img src="./assets/logos/usdc.png" alt="USDC"><div><div class="asset-name">USD Coin</div><div style="font-size:12px;color:var(--muted)">USDC</div></div></div>
+              <div class="asset-price" id="usdc-price">$0</div>
+              <div class="asset-percent"><span>10%</span><div style="font-size:11px;color:var(--muted)" data-es="Riesgo: Bajo" data-en="Risk: Low">Riesgo: Bajo</div></div>
+            </div>
+
+            <div class="portfolio-item">
+              <div class="asset-info"><img src="./assets/logos/bnb.png" alt="BNB"><div><div class="asset-name">BNB</div><div style="font-size:12px;color:var(--muted)">BNB</div></div></div>
+              <div class="asset-price" id="bnb-price">$0</div>
+              <div class="asset-percent"><span>10%</span><div style="font-size:11px;color:var(--muted)" data-es="Riesgo: Bajo" data-en="Risk: Low">Riesgo: Bajo</div></div>
+            </div>
+          </div>
+
+          <div class="coingecko-msg" id="cg-msg">Updated with real-time data from CoinGecko.</div>
+        </div>
+
+        <!-- right: extra / info -->
+        <div class="right">
+          <div style="background:rgba(255,255,255,0.02);padding:12px;border-radius:10px;margin-bottom:12px">
+            <div style="font-size:13px;color:var(--muted)" data-es="Resumen" data-en="Summary">Resumen</div>
+            <div style="margin-top:10px">
+              <div style="display:flex;justify-content:space-between"><div data-es="Score Financiero" data-en="Financial Score">Score Financiero</div><div id="summary-score" style="font-weight:800">76</div></div>
+              <div style="display:flex;justify-content:space-between;margin-top:8px"><div data-es="Última actualización" data-en="Last update">Última actualización</div><div id="last-update" style="color:var(--muted)">--:--</div></div>
+            </div>
+          </div>
+
+          <div style="background:rgba(255,255,255,0.02);padding:12px;border-radius:10px">
+            <div style="font-size:13px;color:var(--muted)" data-es="Acciones Rápidas" data-en="Quick Actions">Acciones Rápidas</div>
+            <div style="margin-top:10px;display:flex;flex-direction:column;gap:8px">
+              <button class="btn" id="refresh-btn" style="padding:8px">Refresh Prices</button>
+              <button class="btn secondary" id="export-btn" style="padding:8px">Export Snapshot</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer" style="margin-top:18px">
+        © <span id="year"></span> ScoreChain · <a href="privacy.html" style="color:var(--muted)">Privacy</a> · <a href="terms.html" style="color:var(--muted)">Terms</a>
+      </div>
     </div>
   </div>
 
   <script>
-    // Año actual
-    document.getElementById("year").textContent = new Date().getFullYear();
+  // ---------------------------
+  // CONFIG
+  // ---------------------------
+  const NETWORKS = {
+    base: {
+      chainId: '0x2105',
+      chainName: 'Base Mainnet',
+      nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
+      rpcUrls: ['https://mainnet.base.org'],
+      blockExplorerUrls: ['https://basescan.org']
+    },
+    ethereum: {
+      chainId: '0x1',
+      chainName: 'Ethereum Mainnet'
+    }
+  };
 
-    // Cambio de idioma
-    document.getElementById('lang-selector')?.addEventListener('change', (e) => {
-      const lang = e.target.value;
-      document.querySelectorAll('[data-es]').forEach(el => {
-        el.textContent = el.getAttribute(`data-${lang}`);
-      });
+  // Helper: format address
+  function formatAddress(addr){
+    if(!addr) return '';
+    return addr.slice(0,6) + '...' + addr.slice(-4);
+  }
+
+  // Helper: format price nicely
+  function fmtPrice(n){
+    if(n === null || n === undefined) return '-';
+    if(n >= 1) return n.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2});
+    return n.toPrecision(4);
+  }
+
+  // language utils
+  const langSelector = document.getElementById('lang-selector');
+  function getLang(){ return langSelector?.value || 'es'; }
+  function translateNode(node){
+    const lang = getLang();
+    if(node && node.dataset){
+      if(node.dataset.es && node.dataset.en){
+        node.textContent = node.dataset[lang];
+      }
+    }
+  }
+  function translateAll(){
+    document.querySelectorAll('[data-es]').forEach(el => {
+      el.textContent = el.getAttribute(`data-${getLang()}`);
     });
+    // update dynamic messages
+    updateCoinGeckoMsg();
+  }
 
-    // Conectar Wallet
-    async function connectWallet() {
-      if (window.ethereum) {
-        try {
-          const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-          const wallet = accounts[0];
-          document.getElementById("walletAddress").textContent = `Wallet conectada: ${wallet}`;
-        } catch (error) {
-          console.error(error);
+  // set year
+  document.getElementById('year').textContent = new Date().getFullYear();
+
+  // ---------------------------
+  // COINGECKO: fetch prices & update UI
+  // ---------------------------
+  const COIN_IDS = {
+    bitcoin: 'bitcoin',
+    ethereum: 'ethereum',
+    solana: 'solana',
+    usdc: 'usd-coin',
+    bnb: 'binancecoin'
+  };
+
+  async function loadCryptoData(){
+    try{
+      const ids = Object.values(COIN_IDS).join(',');
+      const url = `https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd`;
+      const res = await fetch(url);
+      if(!res.ok) throw new Error('CG error '+res.status);
+      const data = await res.json();
+      // update UI
+      document.getElementById('btc-price').textContent = '$' + fmtPrice(data[COIN_IDS.bitcoin].usd);
+      document.getElementById('eth-price').textContent = '$' + fmtPrice(data[COIN_IDS.ethereum].usd);
+      document.getElementById('sol-price').textContent = '$' + fmtPrice(data[COIN_IDS.solana].usd);
+      document.getElementById('usdc-price').textContent = '$' + fmtPrice(data[COIN_IDS.usdc].usd);
+      document.getElementById('bnb-price').textContent = '$' + fmtPrice(data[COIN_IDS.bnb].usd);
+      const now = new Date();
+      document.getElementById('last-update').textContent = now.toLocaleTimeString();
+      // coinGecko msg translation
+      updateCoinGeckoMsg();
+      return true;
+    }catch(err){
+      console.error('Error loading CoinGecko', err);
+      return false;
+    }
+  }
+
+  function updateCoinGeckoMsg(){
+    const el = document.getElementById('cg-msg');
+    const lang = getLang();
+    const texts = {
+      es: 'Actualizado con datos de CoinGecko en tiempo real.',
+      en: 'Updated with real-time data from CoinGecko.'
+    };
+    if(el) el.textContent = texts[lang];
+  }
+
+  // refresh button
+  document.getElementById('refresh-btn').addEventListener('click', async () => {
+    await loadCryptoData();
+  });
+
+  // periodic refresh
+  loadCryptoData();
+  setInterval(loadCryptoData, 60000);
+
+  // ---------------------------
+  // WALLET / METAMASK
+  // ---------------------------
+  const walletDisplay = document.getElementById('walletAddress');
+  const connectBtn = document.getElementById('connect-wallet');
+  const switchBtn = document.getElementById('switch-base');
+
+  async function connectWallet(){
+    if(typeof window.ethereum === 'undefined'){
+      alert(getLang() === 'es' ? 'MetaMask no está instalada.' : 'MetaMask is not installed.');
+      return;
+    }
+    try{
+      const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+      if(accounts && accounts.length > 0){
+        const short = formatAddress(accounts[0]);
+        walletDisplay.textContent = (getLang()==='es' ? '✅ Wallet conectada: ' : '✅ Wallet connected: ') + short;
+        // change connect button label to connected
+        connectBtn.textContent = getLang()==='es' ? '✅ Conectada' : '✅ Connected';
+      }
+    }catch(err){
+      console.error('Connect error', err);
+      walletDisplay.textContent = getLang()==='es' ? '❌ Error al conectar.' : '❌ Connection error.';
+    }
+  }
+
+  async function switchToNetwork(networkKey){
+    if(typeof window.ethereum === 'undefined'){
+      alert(getLang()==='es' ? 'MetaMask no está instalada.' : 'MetaMask is not installed.');
+      return;
+    }
+    const net = NETWORKS[networkKey];
+    if(!net){ console.error('Network not defined', networkKey); return; }
+    try{
+      await window.ethereum.request({ method:'wallet_switchEthereumChain', params: [{ chainId: net.chainId }]});
+      // after switching, refresh accounts
+      const accounts = await window.ethereum.request({ method:'eth_accounts' });
+      if(accounts && accounts.length > 0){
+        walletDisplay.textContent = (getLang()==='es' ? '✅ Wallet conectada: ' : '✅ Wallet connected: ') + formatAddress(accounts[0]);
+      }
+      // show msg on right panel
+      document.getElementById('base-msg').textContent = (getLang()==='es' ? '✅ Conectado a la red Base.' : '✅ Connected to Base network.');
+    }catch(err){
+      // if chain not added (4902), try to add
+      if(err && err.code === 4902){
+        try{
+          await window.ethereum.request({ method:'wallet_addEthereumChain', params: [net] });
+        }catch(addErr){
+          console.error('Add chain error', addErr);
         }
       } else {
-        alert('MetaMask no detectado');
+        console.error('Switch error', err);
       }
     }
-    document.getElementById("connect-wallet").addEventListener("click", connectWallet);
+  }
 
-    // Cambiar a Base Network
-    document.getElementById("switch-base").addEventListener("click", async () => {
-      if (window.ethereum) {
-        try {
-          await window.ethereum.request({
-            method: 'wallet_switchEthereumChain',
-            params: [{ chainId: '0x2105' }]
-          });
-          alert("Conectado a Base Network");
-        } catch (error) {
-          console.error(error);
-        }
+  connectBtn.addEventListener('click', connectWallet);
+  switchBtn.addEventListener('click', () => switchToNetwork('base'));
+
+  // react to account & chain changes to keep UI updated
+  if(window.ethereum){
+    window.ethereum.on && window.ethereum.on('accountsChanged', (accounts) => {
+      if(accounts && accounts.length){
+        walletDisplay.textContent = (getLang()==='es' ? '✅ Wallet conectada: ' : '✅ Wallet connected: ') + formatAddress(accounts[0]);
+        connectBtn.textContent = getLang()==='es' ? '✅ Conectada' : '✅ Connected';
+      } else {
+        walletDisplay.textContent = '';
+        connectBtn.textContent = getLang()==='es' ? '🔌 Conectar Wallet' : '🔌 Connect Wallet';
       }
     });
+    window.ethereum.on && window.ethereum.on('chainChanged', (chainId) => {
+      // optional: update UI or reload
+      // console.log('chain changed', chainId);
+      // reload prices on chain change? not necessary here
+    });
+  }
 
-    // Cargar datos de CoinGecko
-    async function loadCryptoData() {
-      try {
-        const res = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana,usd-coin,binancecoin&vs_currencies=usd");
-        const data = await res.json();
-        document.getElementById("btc-price").textContent = `$${data.bitcoin.usd}`;
-        document.getElementById("eth-price").textContent = `$${data.ethereum.usd}`;
-        document.getElementById("sol-price").textContent = `$${data.solana.usd}`;
-        document.getElementById("usdc-price").textContent = `$${data["usd-coin"].usd}`;
-        document.getElementById("bnb-price").textContent = `$${data.binancecoin.usd}`;
-      } catch (error) {
-        console.error("Error al cargar datos de CoinGecko:", error);
-      }
-    }
-    loadCryptoData();
-    setInterval(loadCryptoData, 60000);
+  // ---------------------------
+  // LANGUAGE
+  // ---------------------------
+  langSelector.addEventListener('change', () => {
+    translateAll();
+  });
+  // initial translate
+  translateAll();
+
+  // ---------------------------
+  // small UX: export snapshot (just JSON download)
+  // ---------------------------
+  document.getElementById('export-btn').addEventListener('click', () => {
+    const snapshot = {
+      timestamp: new Date().toISOString(),
+      prices: {
+        btc: document.getElementById('btc-price').textContent,
+        eth: document.getElementById('eth-price').textContent,
+        sol: document.getElementById('sol-price').textContent,
+        usdc: document.getElementById('usdc-price').textContent,
+        bnb: document.getElementById('bnb-price').textContent
+      },
+      score: document.getElementById('summary-score').textContent
+    };
+    const blob = new Blob([JSON.stringify(snapshot, null, 2)], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = 'scorechain_snapshot.json'; a.click();
+    URL.revokeObjectURL(url);
+  });
+
   </script>
-
 </body>
 </html>
