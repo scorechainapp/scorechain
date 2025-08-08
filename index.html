@@ -6,121 +6,9 @@
   <title>ScoreChain</title>
   <link rel="stylesheet" href="styles.css" />
   <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
-  
-  <script>
-    // ✅ 1. Configuración de redes soportadas
-    const NETWORKS = {
-      base: {
-        chainId: '0x2105', // 8451 decimal
-        chainName: 'Base Mainnet',
-        nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
-        rpcUrls: ['https://mainnet.base.org'],
-        blockExplorerUrls: ['https://basescan.org']
-      },
-      ethereum: {
-        chainId: '0x1',
-        chainName: 'Ethereum Mainnet',
-        nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
-        rpcUrls: ['https://mainnet.infura.io/v3/YOUR_INFURA_KEY'],
-        blockExplorerUrls: ['https://etherscan.io']
-      }
-    };
-
-    // ✅ 2. Traducción dinámica
-    const langSelector = document.getElementById('lang-selector');
-    function getLang() {
-      return langSelector ? langSelector.value : 'es';
-    }
-    function translate(msgs) {
-      const lang = getLang();
-      return msgs[lang] || msgs['es'];
-    }
-
-    // ✅ 3. Formatear dirección
-    function formatAddress(address) {
-      return address.slice(0, 6) + "..." + address.slice(-4);
-    }
-
-    // ✅ 4. Conectar wallet
-    async function connectWallet() {
-      if (typeof window.ethereum === 'undefined') {
-        alert(translate({
-          es: "🚫 MetaMask no está instalada.",
-          en: "🚫 MetaMask is not installed."
-        }));
-        return;
-      }
-      try {
-        const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
-        const address = accounts[0];
-        document.getElementById('walletAddress').textContent =
-          translate({ es: "✅ Wallet conectada: ", en: "✅ Wallet connected: " }) +
-          formatAddress(address);
-      } catch (err) {
-        console.error(err);
-        document.getElementById('walletAddress').textContent =
-          translate({ es: "❌ Error al conectar wallet", en: "❌ Failed to connect wallet" });
-      }
-    }
-
-    // ✅ 5. Cambiar de red
-    async function switchToNetwork(networkKey) {
-      if (typeof window.ethereum === 'undefined') {
-        alert(translate({
-          es: "🚫 MetaMask no está instalada.",
-          en: "🚫 MetaMask is not installed."
-        }));
-        return;
-      }
-
-      const network = NETWORKS[networkKey];
-      if (!network) {
-        console.error(`Red no soportada: ${networkKey}`);
-        return;
-      }
-
-      try {
-        await ethereum.request({
-          method: 'wallet_switchEthereumChain',
-          params: [{ chainId: network.chainId }]
-        });
-        document.getElementById('base-msg').textContent = translate({
-          es: `✅ Conectado a la red ${network.chainName}.`,
-          en: `✅ Connected to ${network.chainName} network.`
-        });
-      } catch (error) {
-        if (error.code === 4902) {
-          try {
-            await ethereum.request({
-              method: 'wallet_addEthereumChain',
-              params: [network]
-            });
-          } catch (addError) {
-            console.error("Error al añadir la red:", addError);
-          }
-        } else {
-          console.error("Error al cambiar de red:", error);
-        }
-      }
-    }
-
-    // ✅ 6. Inicializar eventos al cargar
-    document.addEventListener("DOMContentLoaded", () => {
-      document.getElementById("year").textContent = new Date().getFullYear();
-
-      document.getElementById('connect-wallet').addEventListener('click', connectWallet);
-      document.getElementById('switch-base').addEventListener('click', () => switchToNetwork('base'));
-
-      document.getElementById('lang-selector').addEventListener('change', (e) => {
-        const lang = e.target.value;
-        document.querySelectorAll('[data-es]').forEach(el => {
-          el.textContent = el.getAttribute(`data-${lang}`);
-        });
-      });
-    });
-  </script>
 </head>
 <body>
+  <!-- Selector de idioma -->
   <div class="language-switcher" style="position: absolute; top: 20px; right: 20px;">
     <select id="lang-selector">
       <option value="es">🌐 Español</option>
@@ -129,38 +17,155 @@
   </div>
 
   <div class="card">
+    <!-- Logo y título -->
     <div class="logo">
       <img src="./assets/logos/scorechain.png" alt="ScoreChain">
       <span class="score-title" data-es="Score Financiero" data-en="Financial Score">Score Financiero</span>
     </div>
 
+    <!-- Puntuación -->
     <div class="score-number">76 / 100</div>
-    <div id="wallet-connection" style="margin-top: 15px;"></div>
-    <p id="walletAddress"></p>
-
     <div class="bar-container"></div>
-    <p data-es="Portafolio razonablemente equilibrado" data-en="Reasonably balanced portfolio">
-      Portafolio razonablemente equilibrado
-    </p>
+    <p id="score-info" style="font-size: 12px; color: #aaa; margin-bottom: 10px;"></p>
+    <p data-es="Portafolio razonablemente equilibrado" data-en="Reasonably balanced portfolio">Portafolio razonablemente equilibrado</p>
 
+    <!-- PORTAFOLIO -->
     <div class="portfolio">
-      <!-- activos -->
+      <div class="portfolio-item">
+        <div class="asset-info"><img src="./assets/logos/bitcoin.png" alt="BTC">Bitcoin</div>
+        <div>40% <span class="risk-low" data-es="Riesgo: Bajo" data-en="Risk: Low">Riesgo: Bajo</span></div>
+      </div>
+      <div class="portfolio-item">
+        <div class="asset-info"><img src="./assets/logos/ethereum.png" alt="ETH">Ethereum</div>
+        <div>25% <span class="risk-low" data-es="Riesgo: Bajo" data-en="Risk: Low">Riesgo: Bajo</span></div>
+      </div>
+      <div class="portfolio-item">
+        <div class="asset-info"><img src="./assets/logos/solana.png" alt="SOL">Solana</div>
+        <div>15% <span class="risk-mid" data-es="Riesgo: Moderado" data-en="Risk: Moderate">Riesgo: Moderado</span></div>
+      </div>
+      <div class="portfolio-item">
+        <div class="asset-info"><img src="./assets/logos/usdc.png" alt="USDC">USD Coin</div>
+        <div>10% <span class="risk-low" data-es="Riesgo: Bajo" data-en="Risk: Low">Riesgo: Bajo</span></div>
+      </div>
+      <div class="portfolio-item">
+        <div class="asset-info"><img src="./assets/logos/bnb.png" alt="BNB">BNB</div>
+        <div>10% <span class="risk-low" data-es="Riesgo: Bajo" data-en="Risk: Low">Riesgo: Bajo</span></div>
+      </div>
     </div>
 
-    <div class="coingecko-msg" data-es="Actualizado con datos de CoinGecko en tiempo real." 
+    <div class="coingecko-msg" data-es="Actualizado con datos de CoinGecko en tiempo real."
          data-en="Updated with real-time data from CoinGecko.">
          Actualizado con datos de CoinGecko en tiempo real.
     </div>
 
+    <!-- Botones Wallet -->
     <button id="connect-wallet" data-es="🔌 Conectar Wallet" data-en="🔌 Connect Wallet">🔌 Conectar Wallet</button>
+    <p id="walletAddress"></p>
     <button id="switch-base" data-es="🌐 Cambiar a Base" data-en="🌐 Switch to Base">🌐 Cambiar a Base</button>
     <p id="base-msg"></p>
 
+    <!-- Footer -->
     <div class="footer">
-      © <span id="year"></span> ScoreChain · 
-      <a href="privacy.html" data-es="Política de Privacidad" data-en="Privacy Policy">Política de Privacidad</a> · 
+      <span data-es="Para mejorar tu score, considera diversificar más tu portafolio y reducir tu exposición a activos de mayor riesgo."
+            data-en="To improve your score, consider further diversifying your portfolio and reducing exposure to higher-risk assets.">
+        Para mejorar tu score, considera diversificar más tu portafolio y reducir tu exposición a activos de mayor riesgo.
+      </span><br>
+      © <span id="year"></span> ScoreChain ·
+      <a href="privacy.html" data-es="Política de Privacidad" data-en="Privacy Policy">Política de Privacidad</a> ·
       <a href="terms.html" data-es="Términos" data-en="Terms">Términos</a>
     </div>
   </div>
+
+  <!-- Scripts -->
+  <script>
+    document.getElementById("year").textContent = new Date().getFullYear();
+
+    // Configuración redes soportadas
+    const NETWORKS = {
+      base: {
+        chainId: '0x2105',
+        chainName: 'Base Mainnet',
+        nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
+        rpcUrls: ['https://mainnet.base.org'],
+        blockExplorerUrls: ['https://basescan.org']
+      }
+    };
+
+    const langSelector = document.getElementById('lang-selector');
+    function getLang() { return langSelector ? langSelector.value : 'es'; }
+    function translate(msgs) { return msgs[getLang()] || msgs['es']; }
+
+    // Conectar Wallet
+    async function connectWallet() {
+      if (typeof window.ethereum === 'undefined') {
+        alert(translate({
+          es: "MetaMask no está instalada.",
+          en: "MetaMask is not installed."
+        }));
+        return;
+      }
+      try {
+        const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
+        const address = accounts[0];
+        const shortAddress = address.slice(0, 6) + "..." + address.slice(-4);
+        document.getElementById('walletAddress').textContent = translate({
+          es: "✅ Wallet conectada: ",
+          en: "✅ Wallet connected: "
+        }) + shortAddress;
+      } catch (err) {
+        console.error("Error al conectar:", err);
+      }
+    }
+
+    // Cambiar a Base
+    async function switchToBaseAndConnect() {
+      if (typeof window.ethereum === 'undefined') {
+        alert(translate({
+          es: "MetaMask no está instalada.",
+          en: "MetaMask is not installed."
+        }));
+        return;
+      }
+      try {
+        const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
+        await ethereum.request({
+          method: 'wallet_switchEthereumChain',
+          params: [{ chainId: NETWORKS.base.chainId }]
+        });
+        const address = accounts[0];
+        const shortAddress = address.slice(0, 6) + "..." + address.slice(-4);
+        document.getElementById('walletAddress').textContent = translate({
+          es: "✅ Wallet conectada: ",
+          en: "✅ Wallet connected: "
+        }) + shortAddress;
+        document.getElementById('base-msg').textContent = translate({
+          es: "✅ Conectado a la red Base.",
+          en: "✅ Connected to Base network."
+        });
+      } catch (err) {
+        if (err.code === 4902) {
+          try {
+            await ethereum.request({
+              method: 'wallet_addEthereumChain',
+              params: [NETWORKS.base]
+            });
+          } catch (addErr) {
+            console.error("Error al añadir Base:", addErr);
+          }
+        } else {
+          console.error("Error al cambiar a Base:", err);
+        }
+      }
+    }
+
+    // Eventos
+    document.getElementById('connect-wallet').addEventListener('click', connectWallet);
+    document.getElementById('switch-base').addEventListener('click', switchToBaseAndConnect);
+    langSelector.addEventListener('change', () => {
+      document.querySelectorAll('[data-es]').forEach(el => {
+        el.textContent = el.getAttribute(`data-${getLang()}`);
+      });
+    });
+  </script>
 </body>
 </html>
