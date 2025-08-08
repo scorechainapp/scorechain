@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -7,52 +6,120 @@
   <title>ScoreChain</title>
   <link rel="stylesheet" href="styles.css" />
   <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+  
   <script>
-  const INFURA_URL = "https://mainnet.infura.io/v3/29c4acc1a97c4d9da48abab219ec7e24";
-  let web3 = new Web3(new Web3.providers.HttpProvider(INFURA_URL));
-
-  // ✅ Validación: obtener el número de bloque actual
-  web3.eth.getBlockNumber().then(num => {
-    console.log("✅ Conectado a Infura. Último bloque:", num);
-  }).catch(err => {
-    console.error("❌ Error al conectar con Infura:", err);
-  });
-</script>
-	<script>
-  // ✅ Configuración de redes soportadas
-  const NETWORKS = {
-    ethereum: {
-      chainId: '0x1',
-      chainName: 'Ethereum Mainnet',
-      rpcUrls: ['https://mainnet.infura.io/v3/'],
-      blockExplorerUrls: ['https://etherscan.io']
-    },
-    base: {
-      chainId: '0x2105',
-      chainName: 'Base Mainnet',
-      rpcUrls: ['https://mainnet.base.org'],
-      blockExplorerUrls: ['https://basescan.org']
-    }
-    // Aquí luego puedes agregar más redes si lo deseas
-  };
-</script>
-</head>
-<script>
-  document.getElementById('connectWallet').addEventListener('click', async () => {
-    if (typeof window.ethereum !== 'undefined') {
-      try {
-        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-        const address = accounts[0];
-        document.getElementById('walletAddress').textContent = `✅ Conectado: ${address}`;
-      } catch (err) {
-        document.getElementById('walletAddress').textContent = '❌ Error al conectar.';
-        console.error(err);
+    // ✅ 1. Configuración de redes soportadas
+    const NETWORKS = {
+      base: {
+        chainId: '0x2105', // 8451 decimal
+        chainName: 'Base Mainnet',
+        nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
+        rpcUrls: ['https://mainnet.base.org'],
+        blockExplorerUrls: ['https://basescan.org']
+      },
+      ethereum: {
+        chainId: '0x1',
+        chainName: 'Ethereum Mainnet',
+        nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
+        rpcUrls: ['https://mainnet.infura.io/v3/YOUR_INFURA_KEY'],
+        blockExplorerUrls: ['https://etherscan.io']
       }
-    } else {
-      alert("🚫 MetaMask no está instalada. Descárgala desde https://metamask.io");
+    };
+
+    // ✅ 2. Traducción dinámica
+    const langSelector = document.getElementById('lang-selector');
+    function getLang() {
+      return langSelector ? langSelector.value : 'es';
     }
-  });
-</script>
+    function translate(msgs) {
+      const lang = getLang();
+      return msgs[lang] || msgs['es'];
+    }
+
+    // ✅ 3. Formatear dirección
+    function formatAddress(address) {
+      return address.slice(0, 6) + "..." + address.slice(-4);
+    }
+
+    // ✅ 4. Conectar wallet
+    async function connectWallet() {
+      if (typeof window.ethereum === 'undefined') {
+        alert(translate({
+          es: "🚫 MetaMask no está instalada.",
+          en: "🚫 MetaMask is not installed."
+        }));
+        return;
+      }
+      try {
+        const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
+        const address = accounts[0];
+        document.getElementById('walletAddress').textContent =
+          translate({ es: "✅ Wallet conectada: ", en: "✅ Wallet connected: " }) +
+          formatAddress(address);
+      } catch (err) {
+        console.error(err);
+        document.getElementById('walletAddress').textContent =
+          translate({ es: "❌ Error al conectar wallet", en: "❌ Failed to connect wallet" });
+      }
+    }
+
+    // ✅ 5. Cambiar de red
+    async function switchToNetwork(networkKey) {
+      if (typeof window.ethereum === 'undefined') {
+        alert(translate({
+          es: "🚫 MetaMask no está instalada.",
+          en: "🚫 MetaMask is not installed."
+        }));
+        return;
+      }
+
+      const network = NETWORKS[networkKey];
+      if (!network) {
+        console.error(`Red no soportada: ${networkKey}`);
+        return;
+      }
+
+      try {
+        await ethereum.request({
+          method: 'wallet_switchEthereumChain',
+          params: [{ chainId: network.chainId }]
+        });
+        document.getElementById('base-msg').textContent = translate({
+          es: `✅ Conectado a la red ${network.chainName}.`,
+          en: `✅ Connected to ${network.chainName} network.`
+        });
+      } catch (error) {
+        if (error.code === 4902) {
+          try {
+            await ethereum.request({
+              method: 'wallet_addEthereumChain',
+              params: [network]
+            });
+          } catch (addError) {
+            console.error("Error al añadir la red:", addError);
+          }
+        } else {
+          console.error("Error al cambiar de red:", error);
+        }
+      }
+    }
+
+    // ✅ 6. Inicializar eventos al cargar
+    document.addEventListener("DOMContentLoaded", () => {
+      document.getElementById("year").textContent = new Date().getFullYear();
+
+      document.getElementById('connect-wallet').addEventListener('click', connectWallet);
+      document.getElementById('switch-base').addEventListener('click', () => switchToNetwork('base'));
+
+      document.getElementById('lang-selector').addEventListener('change', (e) => {
+        const lang = e.target.value;
+        document.querySelectorAll('[data-es]').forEach(el => {
+          el.textContent = el.getAttribute(`data-${lang}`);
+        });
+      });
+    });
+  </script>
+</head>
 <body>
   <div class="language-switcher" style="position: absolute; top: 20px; right: 20px;">
     <select id="lang-selector">
@@ -68,228 +135,32 @@
     </div>
 
     <div class="score-number">76 / 100</div>
-	<div id="wallet-connection" style="margin-top: 15px;">
-</div>
+    <div id="wallet-connection" style="margin-top: 15px;"></div>
+    <p id="walletAddress"></p>
+
     <div class="bar-container"></div>
-    <p id="score-info" style="font-size: 12px; color: #aaa; margin-bottom: 10px;"></p>
-    <p data-es="Portafolio razonablemente equilibrado" data-en="Reasonably balanced portfolio">Portafolio razonablemente equilibrado</p>
+    <p data-es="Portafolio razonablemente equilibrado" data-en="Reasonably balanced portfolio">
+      Portafolio razonablemente equilibrado
+    </p>
 
     <div class="portfolio">
-      <div class="portfolio-item">
-        <div class="asset-info"><img src="./assets/logos/bitcoin.png" alt="BTC">Bitcoin</div>
-        <div>40% <span class="risk-low" data-es="Riesgo: Bajo" data-en="Risk: Low">Riesgo: Bajo</span></div>
-      </div>
-      <div class="portfolio-item">
-        <div class="asset-info"><img src="./assets/logos/ethereum.png" alt="ETH">Ethereum</div>
-        <div>25% <span class="risk-low" data-es="Riesgo: Bajo" data-en="Risk: Low">Riesgo: Bajo</span></div>
-      </div>
-      <div class="portfolio-item">
-        <div class="asset-info"><img src="./assets/logos/solana.png" alt="SOL">Solana</div>
-        <div>15% <span class="risk-mid" data-es="Riesgo: Moderado" data-en="Risk: Moderate">Riesgo: Moderado</span></div>
-      </div>
-      <div class="portfolio-item">
-        <div class="asset-info"><img src="./assets/logos/usdc.png" alt="USDC">USD Coin</div>
-        <div>10% <span class="risk-low" data-es="Riesgo: Bajo" data-en="Risk: Low">Riesgo: Bajo</span></div>
-      </div>
-      <div class="portfolio-item">
-        <div class="asset-info"><img src="./assets/logos/bnb.png" alt="BNB">BNB</div>
-        <div>10% <span class="risk-low" data-es="Riesgo: Bajo" data-en="Risk: Low">Riesgo: Bajo</span></div>
-      </div>
+      <!-- activos -->
     </div>
 
     <div class="coingecko-msg" data-es="Actualizado con datos de CoinGecko en tiempo real." 
          data-en="Updated with real-time data from CoinGecko.">
          Actualizado con datos de CoinGecko en tiempo real.
     </div>
-	<button id="connect-wallet" data-es="🔌 Conectar Wallet" data-en="🔌 Connect Wallet">🔌 Conectar Wallet</button>
-<p id="walletAddress" data-es="" data-en=""></p>
-<button id="switch-base" data-es="🌐 Cambiar a Base" data-en="🌐 Switch to Base">🌐 Cambiar a Base</button>
-<p id="base-msg" data-es="" data-en=""></p>
+
+    <button id="connect-wallet" data-es="🔌 Conectar Wallet" data-en="🔌 Connect Wallet">🔌 Conectar Wallet</button>
+    <button id="switch-base" data-es="🌐 Cambiar a Base" data-en="🌐 Switch to Base">🌐 Cambiar a Base</button>
+    <p id="base-msg"></p>
 
     <div class="footer">
-      <span data-es="Para mejorar tu score, considera diversificar más tu portafolio y reducir tu exposición a activos de mayor riesgo." 
-            data-en="To improve your score, consider further diversifying your portfolio and reducing exposure to higher-risk assets.">
-        Para mejorar tu score, considera diversificar más tu portafolio y reducir tu exposición a activos de mayor riesgo.
-      </span><br>
       © <span id="year"></span> ScoreChain · 
       <a href="privacy.html" data-es="Política de Privacidad" data-en="Privacy Policy">Política de Privacidad</a> · 
       <a href="terms.html" data-es="Términos" data-en="Terms">Términos</a>
     </div>
   </div>
-
-  <script>
-    document.getElementById("year").textContent = new Date().getFullYear();
-
-    document.getElementById('lang-selector').addEventListener('change', (e) => {
-      const lang = e.target.value;
-      document.querySelectorAll('[data-es]').forEach(el => {
-        el.textContent = el.getAttribute(`data-${lang}`);
-      });
-    });
-  </script>
-  <script>
-  const connectButton = document.getElementById('connect-wallet');
-  const walletDisplay = document.getElementById('wallet-address');
-
-  async function connectWallet() {
-    if (window.ethereum) {
-      try {
-        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-        const wallet = accounts[0];
-       // ✅ Aquí es donde debes guardar y formatear la dirección
-      setWallet(formatAddress(wallet)); // ejemplo: 0x123...abcd
-      setConnected(true);
-      toast.success('Wallet conectada');
-
-    } catch (error) {
-      console.error(error);
-      toast.error('Error al conectar wallet');
-    }
-  } else {
-    toast.error('MetaMask no detectado');
-  }
-}
-
-  connectButton.addEventListener('click', connectWallet);
-</script>
-  <script src="script.js"></script>
-  <script>
-  document.addEventListener("DOMContentLoaded", () => {
-    const connectBtn = document.getElementById("connect-wallet");
-
-    if (!connectBtn) return;
-
-    connectBtn.addEventListener("click", async () => {
-      if (typeof window.ethereum !== 'undefined') {
-        try {
-          const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-          const address = accounts[0];
-          console.log("✅ Wallet conectada:", address);
-          connectBtn.textContent = "✅ Wallet conectada";
-        } catch (err) {
-          console.error("❌ Error al conectar con MetaMask:", err.message);
-        }
-      } else {
-        alert("MetaMask no está instalada. Instálala para continuar.");
-      }
-    });
-  });
-  <script>
-  const baseParams = {
-    chainId: '0x2105', // Base Mainnet
-    chainName: 'Base Mainnet',
-    nativeCurrency: {
-      name: 'Ether',
-      symbol: 'ETH',
-      decimals: 18
-    },
-    rpcUrls: ['https://mainnet.base.org'],
-    blockExplorerUrls: ['https://basescan.org']
-  };
-
-  const baseMsg = document.getElementById("base-msg");
-
-  document.getElementById("switch-base").addEventListener("click", async () => {
-    if (typeof window.ethereum !== 'undefined') {
-      try {
-        await window.ethereum.request({
-          method: 'wallet_addEthereumChain',
-          params: [baseParams]
-        });
-        baseMsg.setAttribute("data-es", "✅ Conectado a la red Base.");
-        baseMsg.setAttribute("data-en", "✅ Connected to Base network.");
-        const lang = document.getElementById("lang-selector").value;
-        baseMsg.textContent = baseMsg.getAttribute(`data-${lang}`);
-      } catch (err) {
-        console.error(err);
-        baseMsg.setAttribute("data-es", "❌ Error al cambiar a Base.");
-        baseMsg.setAttribute("data-en", "❌ Failed to switch to Base.");
-        const lang = document.getElementById("lang-selector").value;
-        baseMsg.textContent = baseMsg.getAttribute(`data-${lang}`);
-      }
-    } else {
-      baseMsg.setAttribute("data-es", "❌ MetaMask no está instalada.");
-      baseMsg.setAttribute("data-en", "❌ MetaMask is not installed.");
-      const lang = document.getElementById("lang-selector").value;
-      baseMsg.textContent = baseMsg.getAttribute(`data-${lang}`);
-    }
-  });
-
-  // Traducir textos dinámicos al cambiar idioma
-  document.getElementById('lang-selector').addEventListener('change', (e) => {
-    const lang = e.target.value;
-    document.querySelectorAll('[data-es]').forEach(el => {
-      el.textContent = el.getAttribute(`data-${lang}`);
-    });
-  });
-</script>
-<script>
-  const langSelector = document.getElementById('lang-selector');
-
-  function getLang() {
-    return langSelector ? langSelector.value : 'es';
-  }
-
-  function translate(msgs) {
-    const lang = getLang();
-    return msgs[lang] || msgs['es'];
-  }
-
-  async function switchToBaseAndConnect() {
-    if (typeof window.ethereum === 'undefined') {
-      alert(translate({
-        es: "MetaMask no está instalada. Por favor instálala para continuar.",
-        en: "MetaMask is not installed. Please install it to continue."
-      }));
-      return;
-    }
-
-    try {
-      // Conectar la wallet si no está conectada
-      const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
-
-      // Cambiar a la red Base
-      await ethereum.request({
-        method: 'wallet_switchEthereumChain',
-        params: [{ chainId: '0x2105' }] // 8451 en decimal
-      });
-const address = accounts[0];
-      const shortAddress = address.slice(0, 6) + "..." + address.slice(-4);
-document.getElementById('walletAddress').textContent = translate({
-  es: "✅ Wallet conectada: ",
-  en: "✅ Wallet connected: "
-}) + shortAddress;
-
-    } catch (switchError) {
-      // Si la red Base no está añadida, la añadimos
-      if (switchError.code === 4902) {
-        try {
-          await ethereum.request({
-            method: 'wallet_addEthereumChain',
-            params: [{
-              chainId: '0x2105',
-              chainName: 'Base',
-              rpcUrls: ['https://mainnet.base.org'],
-              nativeCurrency: {
-                name: 'Ethereum',
-                symbol: 'ETH',
-                decimals: 18
-              },
-              blockExplorerUrls: ['https://basescan.org']
-            }]
-          });
-        } catch (addError) {
-          console.error("Error al añadir la red Base:", addError);
-        }
-      } else {
-        console.error("Error al cambiar de red:", switchError);
-      }
-    }
-  }
-
-  // Vincular al botón
-  document.getElementById('switch-base').addEventListener('click', switchToBaseAndConnect);
-</script>
-</script>
 </body>
 </html>
