@@ -18,6 +18,24 @@
     console.error("❌ Error al conectar con Infura:", err);
   });
 </script>
+	<script>
+  // ✅ Configuración de redes soportadas
+  const NETWORKS = {
+    ethereum: {
+      chainId: '0x1',
+      chainName: 'Ethereum Mainnet',
+      rpcUrls: ['https://mainnet.infura.io/v3/'],
+      blockExplorerUrls: ['https://etherscan.io']
+    },
+    base: {
+      chainId: '0x2105',
+      chainName: 'Base Mainnet',
+      rpcUrls: ['https://mainnet.base.org'],
+      blockExplorerUrls: ['https://basescan.org']
+    }
+    // Aquí luego puedes agregar más redes si lo deseas
+  };
+</script>
 </head>
 <script>
   document.getElementById('connectWallet').addEventListener('click', async () => {
