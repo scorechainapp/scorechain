@@ -403,7 +403,7 @@
         // ---------------------------
         // CONFIG
         // ---------------------------
-        const INFURA_API_KEY = '9fa8ada75524485e8b6075524e49c4f3'; // ¡Tu clave de Infura!
+        const INFURA_API_KEY = '9fa8ada75524485e8b6075524e49c4f3';
         const INFURA_URL = `https://base-mainnet.infura.io/v3/${INFURA_API_KEY}`;
 
         // Contratos de los tokens más populares en la red Base
@@ -492,8 +492,6 @@
         }
         
         function getCoinGeckoLogoUrl(id) {
-            // Esta función te daría la URL del logo real
-            // Por simplicidad, todavía usaremos los logos locales
             return `./assets/logos/${id}.png`; 
         }
 
@@ -636,7 +634,6 @@
                 const item = document.createElement('div');
                 item.className = 'portfolio-item';
                 
-                // La ganancia/pérdida se omite por ahora
                 const pnlClass = ''; 
                 const pnlText = '';
                 const riskClass = getRiskLevelClass(asset.risk);
@@ -692,7 +689,7 @@
                     walletDisplay.textContent = (getLang() === 'es' ? '✅ Wallet conectada: ' : '✅ Wallet connected: ') + short;
                     connectBtn.textContent = getLang() === 'es' ? '✅ Conectada' : '✅ Connected';
 
-                    // NUEVO: Carga los datos del portafolio después de conectar
+                    // Carga los datos del portafolio después de conectar
                     fetchPortfolioData(currentAccount);
 
                 }
