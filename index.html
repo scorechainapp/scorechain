@@ -123,7 +123,7 @@
         .left {
             min-height: 220px;
         }
-        
+
         /* score area */
         .score-box {
             background: rgba(255, 255, 255, 0.02);
@@ -198,6 +198,14 @@
             font-weight: 700;
         }
 
+        .risk-low {
+            color: rgba(100, 255, 100, 0.6); /* Verde tenue por defecto */
+        }
+
+        .risk-moderate {
+            color: rgba(255, 200, 50, 0.6); /* Amarillo tenue por defecto */
+        }
+
         .coingecko-msg {
             margin-top: 12px;
             font-size: 13px;
@@ -248,249 +256,4 @@
                     <div class="score-box">
                         <div class="score-title" data-es="Score Financiero" data-en="Financial Score">Score Financiero</div>
                         <div class="score-number" id="score-number">76 / 100</div>
-                        <div class="score-bar" id="score-bar" role="progressbar" aria-valuenow="76" aria-valuemin="0" aria-valuemax="100"></div>
-                        <div style="margin-top:8px;font-size:13px;color:var(--muted)" id="score-desc" data-es="Portafolio razonablemente equilibrado" data-en="Reasonably balanced portfolio">Portafolio razonablemente equilibrado</div>
-                    </div>
-
-                    <div class="portfolio" id="portfolio">
-                        <div class="portfolio-item">
-                            <div class="asset-info"><img src="./assets/logos/bitcoin.png" alt="BTC"><div><div class="asset-name">Bitcoin</div><div style="font-size:12px;color:var(--muted)">BTC</div></div></div>
-                            <div class="asset-price" id="btc-price">$0</div>
-                            <div class="asset-percent"><span>40%</span><div style="font-size:11px;color:var(--muted)" data-es="Riesgo: Bajo" data-en="Risk: Low">Riesgo: Bajo</div></div>
-                        </div>
-
-                        <div class="portfolio-item">
-                            <div class="asset-info"><img src="./assets/logos/ethereum.png" alt="ETH"><div><div class="asset-name">Ethereum</div><div style="font-size:12px;color:var(--muted)">ETH</div></div></div>
-                            <div class="asset-price" id="eth-price">$0</div>
-                            <div class="asset-percent"><span>25%</span><div style="font-size:11px;color:var(--muted)" data-es="Riesgo: Bajo" data-en="Risk: Low">Riesgo: Bajo</div></div>
-                        </div>
-
-                        <div class="portfolio-item">
-                            <div class="asset-info"><img src="./assets/logos/solana.png" alt="SOL"><div><div class="asset-name">Solana</div><div style="font-size:12px;color:var(--muted)">SOL</div></div></div>
-                            <div class="asset-price" id="sol-price">$0</div>
-                            <div class="asset-percent"><span>15%</span><div style="font-size:11px;color:var(--muted)" data-es="Riesgo: Moderado" data-en="Risk: Moderate">Riesgo: Moderado</div></div>
-                        </div>
-
-                        <div class="portfolio-item">
-                            <div class="asset-info"><img src="./assets/logos/usdc.png" alt="USDC"><div><div class="asset-name">USD Coin</div><div style="font-size:12px;color:var(--muted)">USDC</div></div></div>
-                            <div class="asset-price" id="usdc-price">$0</div>
-                            <div class="asset-percent"><span>10%</span><div style="font-size:11px;color:var(--muted)" data-es="Riesgo: Bajo" data-en="Risk: Low">Riesgo: Bajo</div></div>
-                        </div>
-
-                        <div class="portfolio-item">
-                            <div class="asset-info"><img src="./assets/logos/bnb.png" alt="BNB"><div><div class="asset-name">BNB</div><div style="font-size:12px;color:var(--muted)">BNB</div></div></div>
-                            <div class="asset-price" id="bnb-price">$0</div>
-                            <div class="asset-percent"><span>10%</span><div style="font-size:11px;color:var(--muted)" data-es="Riesgo: Bajo" data-en="Risk: Low">Riesgo: Bajo</div></div>
-                        </div>
-                    </div>
-
-                    <div class="coingecko-msg" id="cg-msg"></div>
-                </div>
-            </div>
-
-            <div class="footer" style="margin-top:18px">
-                © <span id="year"></span> ScoreChain · <a href="privacy.html" style="color:var(--muted)">Privacy</a> · <a href="terms.html" style="color:var(--muted)">Terms</a>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        // ---------------------------
-        // CONFIG
-        // ---------------------------
-        const NETWORKS = {
-            base: {
-                chainId: '0x2105',
-                chainName: 'Base Mainnet',
-                nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
-                rpcUrls: ['https://mainnet.base.org'],
-                blockExplorerUrls: ['https://basescan.org']
-            },
-            ethereum: {
-                chainId: '0x1',
-                chainName: 'Ethereum Mainnet'
-            }
-        };
-
-        // Helper: format address
-        function formatAddress(addr) {
-            if (!addr) return '';
-            return addr.slice(0, 6) + '...' + addr.slice(-4);
-        }
-
-        // Helper: format price nicely
-        function fmtPrice(n) {
-            if (n === null || n === undefined) return '-';
-            if (n >= 1) return n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-            return n.toPrecision(4);
-        }
-
-        // language utils
-        const langSelector = document.getElementById('lang-selector');
-
-        function getLang() {
-            return langSelector?.value || 'es';
-        }
-
-        function translateNode(node) {
-            const lang = getLang();
-            if (node && node.dataset) {
-                if (node.dataset.es && node.dataset.en) {
-                    node.textContent = node.dataset[lang];
-                }
-            }
-        }
-
-        function translateAll() {
-            document.querySelectorAll('[data-es]').forEach(el => {
-                el.textContent = el.getAttribute(`data-${getLang()}`);
-            });
-            // update dynamic messages
-            updateCoinGeckoMsg();
-        }
-
-        // set year
-        document.getElementById('year').textContent = new Date().getFullYear();
-
-        // ---------------------------
-        // COINGECKO: fetch prices & update UI
-        // ---------------------------
-        const COIN_IDS = {
-            bitcoin: 'bitcoin',
-            ethereum: 'ethereum',
-            solana: 'solana',
-            usdc: 'usd-coin',
-            bnb: 'binancecoin'
-        };
-
-        async function loadCryptoData() {
-            try {
-                const ids = Object.values(COIN_IDS).join(',');
-                const url = `https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd`;
-                const res = await fetch(url);
-                if (!res.ok) throw new Error('CG error ' + res.status);
-                const data = await res.json();
-                // update UI
-                document.getElementById('btc-price').textContent = '$' + fmtPrice(data[COIN_IDS.bitcoin].usd);
-                document.getElementById('eth-price').textContent = '$' + fmtPrice(data[COIN_IDS.ethereum].usd);
-                document.getElementById('sol-price').textContent = '$' + fmtPrice(data[COIN_IDS.solana].usd);
-                document.getElementById('usdc-price').textContent = '$' + fmtPrice(data[COIN_IDS.usdc].usd);
-                document.getElementById('bnb-price').textContent = '$' + fmtPrice(data[COIN_IDS.bnb].usd);
-                
-                // update CoinGecko message with current time
-                updateCoinGeckoMsg();
-                return true;
-            } catch (err) {
-                console.error('Error loading CoinGecko', err);
-                return false;
-            }
-        }
-
-        function updateCoinGeckoMsg() {
-            const el = document.getElementById('cg-msg');
-            const lang = getLang();
-            const now = new Date();
-            const timeString = now.toLocaleTimeString();
-
-            const texts = {
-                es: `Actualizado con datos de CoinGecko en tiempo real a las ${timeString}.`,
-                en: `Updated with real-time data from CoinGecko at ${timeString}.`
-            };
-            if (el) el.textContent = texts[lang];
-        }
-
-        // periodic refresh
-        loadCryptoData();
-        setInterval(loadCryptoData, 60000);
-
-        // ---------------------------
-        // WALLET / METAMASK
-        // ---------------------------
-        const walletDisplay = document.getElementById('walletAddress');
-        const connectBtn = document.getElementById('connect-wallet');
-        const switchBtn = document.getElementById('switch-base');
-
-        async function connectWallet() {
-            if (typeof window.ethereum === 'undefined') {
-                alert(getLang() === 'es' ? 'MetaMask no está instalada.' : 'MetaMask is not installed.');
-                return;
-            }
-            try {
-                const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-                if (accounts && accounts.length > 0) {
-                    const short = formatAddress(accounts[0]);
-                    walletDisplay.textContent = (getLang() === 'es' ? '✅ Wallet conectada: ' : '✅ Wallet connected: ') + short;
-                    // change connect button label to connected
-                    connectBtn.textContent = getLang() === 'es' ? '✅ Conectada' : '✅ Connected';
-                }
-            } catch (err) {
-                console.error('Connect error', err);
-                walletDisplay.textContent = getLang() === 'es' ? '❌ Error al conectar.' : '❌ Connection error.';
-            }
-        }
-
-        async function switchToNetwork(networkKey) {
-            if (typeof window.ethereum === 'undefined') {
-                alert(getLang() === 'es' ? 'MetaMask no está instalada.' : 'MetaMask is not installed.');
-                return;
-            }
-            const net = NETWORKS[networkKey];
-            if (!net) {
-                console.error('Network not defined', networkKey);
-                return;
-            }
-            try {
-                await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: net.chainId }] });
-                // after switching, refresh accounts
-                const accounts = await window.ethereum.request({ method: 'eth_accounts' });
-                if (accounts && accounts.length > 0) {
-                    walletDisplay.textContent = (getLang() === 'es' ? '✅ Wallet conectada: ' : '✅ Wallet connected: ') + formatAddress(accounts[0]);
-                }
-                // show msg on right panel
-                document.getElementById('base-msg').textContent = (getLang() === 'es' ? '✅ Conectado a la red Base.' : '✅ Connected to Base network.');
-            } catch (err) {
-                // if chain not added (4902), try to add
-                if (err && err.code === 4902) {
-                    try {
-                        await window.ethereum.request({ method: 'wallet_addEthereumChain', params: [net] });
-                    } catch (addErr) {
-                        console.error('Add chain error', addErr);
-                    }
-                } else {
-                    console.error('Switch error', err);
-                }
-            }
-        }
-
-        connectBtn.addEventListener('click', connectWallet);
-        switchBtn.addEventListener('click', () => switchToNetwork('base'));
-
-        // react to account & chain changes to keep UI updated
-        if (window.ethereum) {
-            window.ethereum.on && window.ethereum.on('accountsChanged', (accounts) => {
-                if (accounts && accounts.length) {
-                    walletDisplay.textContent = (getLang() === 'es' ? '✅ Wallet conectada: ' : '✅ Wallet connected: ') + formatAddress(accounts[0]);
-                    connectBtn.textContent = getLang() === 'es' ? '✅ Conectada' : '✅ Connected';
-                } else {
-                    walletDisplay.textContent = '';
-                    connectBtn.textContent = getLang() === 'es' ? '🔌 Conectar Wallet' : '🔌 Connect Wallet';
-                }
-            });
-            window.ethereum.on && window.ethereum.on('chainChanged', (chainId) => {
-                // optional: update UI or reload
-                // console.log('chain changed', chainId);
-                // reload prices on chain change? not necessary here
-            });
-        }
-
-        // ---------------------------
-        // LANGUAGE
-        // ---------------------------
-        langSelector.addEventListener('change', () => {
-            translateAll();
-        });
-        // initial translate
-        translateAll();
-    </script>
-</body>
-</html>
+                        <div class="score-bar" id="score-bar
