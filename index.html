@@ -405,6 +405,18 @@
         // ---------------------------
         const INFURA_API_KEY = '9fa8ada75524485e8b6075524e49c4f3';
         const INFURA_URL = `https://base-mainnet.infura.io/v3/${INFURA_API_KEY}`;
+        
+        // --- NUEVO --- Configuración para la red Base
+        const NETWORKS = {
+            base: {
+                chainId: '0x2105', // 8453 en decimal
+                chainName: 'Base Mainnet',
+                nativeCurrency: { name: 'ETH', symbol: 'ETH', decimals: 18 },
+                rpcUrls: ['https://mainnet.base.org'],
+                blockExplorerUrls: ['https://basescan.org'],
+            },
+        };
+        // --- FIN NUEVO ---
 
         // Contratos de los tokens más populares en la red Base
         const TOKENS_ON_BASE = [
@@ -711,7 +723,7 @@
             }
             try {
                 await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: net.chainId }] });
-                alert(getLang() === 'es' ? '✅ Conectado a la red Base.' : '✅ Connected to Base network.');
+                // No es necesario un alert, el evento 'chainChanged' se encargará de esto
             } catch (err) {
                 if (err && err.code === 4902) {
                     try {
