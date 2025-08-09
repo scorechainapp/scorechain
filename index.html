@@ -8,7 +8,9 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="icon" type="image/png" href="./assets/logos/scorechain.png">
+    <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js"></script>
     <style>
+        /* ... Tu CSS anterior ... */
         :root {
             --bg: #0b0f1a;
             --card: #0f1724;
@@ -401,37 +403,35 @@
         // ---------------------------
         // CONFIG
         // ---------------------------
-        const NETWORKS = {
-            base: {
-                chainId: '0x2105',
-                chainName: 'Base Mainnet',
-                nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
-                rpcUrls: ['https://mainnet.base.org'],
-                blockExplorerUrls: ['https://basescan.org']
-            },
-            ethereum: {
-                chainId: '0x1',
-                chainName: 'Ethereum Mainnet'
-            }
+        const INFURA_API_KEY = '9fa8ada75524485e8b6075524e49c4f3'; // ¡Tu clave de Infura!
+        const INFURA_URL = `https://base-mainnet.infura.io/v3/${INFURA_API_KEY}`;
+
+        // Contratos de los tokens más populares en la red Base
+        const TOKENS_ON_BASE = [
+            { id: 'weth', symbol: 'WETH', name: 'Wrapped Ether', address: '0x4200000000000000000000000000000000000006', decimals: 18, risk: 20 },
+            { id: 'usd-coin', symbol: 'USDC', name: 'USD Coin', address: '0x833589fCD6eDb6E08f4c7C32D4f767BfFD1Ca7B3', decimals: 6, risk: 5 },
+            { id: 'dai', symbol: 'DAI', name: 'Dai', address: '0x50c572591904a40875c7b39922572D8E09C2d4b9', decimals: 18, risk: 10 },
+            { id: 'aave', symbol: 'AAVE', name: 'Aave', address: '0x153A81c3c97D8618eB477A14a796850d99F44c1f', decimals: 18, risk: 60 },
+            { id: 'uniswap', symbol: 'UNI', name: 'Uniswap', address: '0x867825b154a1D8D27993a44d7324B35E170f3807', decimals: 18, risk: 55 },
+        ];
+
+        // Mapeo para obtener ID de CoinGecko
+        const COINGECKO_ID_MAP = {
+            'weth': 'weth',
+            'usdc': 'usd-coin',
+            'dai': 'dai',
+            'aave': 'aave',
+            'uni': 'uniswap',
         };
 
         const RISK_SCORES = {
-            'ethereum': 30, // Bajo riesgo
-            'bitcoin': 25, // Bajo riesgo
-            'solana': 55, // Riesgo moderado
+            'weth': 20, // Bajo riesgo
             'usd-coin': 5, // Muy bajo riesgo
-            'binancecoin': 40, // Riesgo moderado
-            'tether': 6,
-            'uniswap': 60, // Riesgo moderado-alto
+            'dai': 10,
+            'aave': 60, // Riesgo moderado-alto
+            'uniswap': 55, // Riesgo moderado-alto
         };
 
-        const PORTFOLIO_MOCK_DATA = [
-            // NUEVO: Datos simulados. En una aplicación real, se obtendrían de la blockchain.
-            { id: 'ethereum', symbol: 'ETH', balance: 1.5, purchasePrice: 2000 },
-            { id: 'solana', symbol: 'SOL', balance: 10, purchasePrice: 50 },
-            { id: 'usd-coin', symbol: 'USDC', balance: 500, purchasePrice: 1 },
-            { id: 'uniswap', symbol: 'UNI', balance: 5, purchasePrice: 15 },
-        ];
 
         // Helper: format address
         function formatAddress(addr) {
@@ -490,6 +490,12 @@
                 return {};
             }
         }
+        
+        function getCoinGeckoLogoUrl(id) {
+            // Esta función te daría la URL del logo real
+            // Por simplicidad, todavía usaremos los logos locales
+            return `./assets/logos/${id}.png`; 
+        }
 
         function updateCoinGeckoMsg() {
             const el = document.getElementById('cg-msg');
@@ -498,8 +504,8 @@
             const timeString = now.toLocaleTimeString();
 
             const texts = {
-                es: `Actualizado con datos de CoinGecko en tiempo real a las ${timeString}.`,
-                en: `Updated with real-time data from CoinGecko at ${timeString}.`
+                es: `Precios de CoinGecko a las ${timeString}.`,
+                en: `Prices from CoinGecko at ${timeString}.`
             };
             if (el) el.textContent = texts[lang];
         }
@@ -507,29 +513,76 @@
         // ---------------------------
         // CALCULAR Y ACTUALIZAR PORTAFOLIO Y RIESGO
         // ---------------------------
-        async function fetchPortfolioData() {
-            // Mapea los IDs de las monedas para la API de CoinGecko
-            const coinIds = PORTFOLIO_MOCK_DATA.map(c => c.id);
+        async function fetchPortfolioData(address) {
+            if (!address) {
+                console.error('No wallet address provided.');
+                return;
+            }
+            document.getElementById('portfolio-list').innerHTML = `<p style="text-align:center;color:var(--muted)">Cargando tu portafolio...</p>`;
+
+            // NUEVO: Conectar con Ethers.js
+            const provider = new ethers.providers.JsonRpcProvider(INFURA_URL);
+            
+            // 1. Obtener balance de ETH (native token)
+            let ethBalanceWei = await provider.getBalance(address);
+            const ethBalance = ethers.utils.formatEther(ethBalanceWei);
+
+            const portfolioPromises = TOKENS_ON_BASE.map(async token => {
+                const contract = new ethers.Contract(token.address, ["function balanceOf(address) view returns (uint256)"], provider);
+                const balanceWei = await contract.balanceOf(address);
+                const balance = ethers.utils.formatUnits(balanceWei, token.decimals);
+                
+                // Solo si el balance es > 0, lo agregamos al portafolio
+                if (parseFloat(balance) > 0) {
+                    return { ...token, balance: parseFloat(balance), id: COINGECKO_ID_MAP[token.symbol.toLowerCase()] };
+                }
+                return null;
+            });
+
+            // Esperar a que se completen todas las promesas y filtrar los nulos
+            let portfolioAssets = (await Promise.all(portfolioPromises)).filter(asset => asset !== null);
+
+            // Agregar el balance de ETH al portafolio si es mayor que 0
+            if (parseFloat(ethBalance) > 0.001) {
+                portfolioAssets.unshift({
+                    id: 'ethereum', 
+                    symbol: 'ETH', 
+                    name: 'Ethereum', 
+                    balance: parseFloat(ethBalance),
+                    risk: 25,
+                    // No hay una dirección de contrato para el ETH nativo
+                });
+            }
+
+            // Si no hay activos, mostrar un mensaje
+            if (portfolioAssets.length === 0) {
+                document.getElementById('portfolio-list').innerHTML = `<p style="text-align:center;color:var(--muted)">No se encontraron activos en la red Base.</p>`;
+                updateRiskScore(0);
+                return;
+            }
+
+            // Obtener precios de CoinGecko
+            const coinIds = portfolioAssets.map(c => c.id);
             const prices = await loadCryptoData(coinIds);
 
-            // Calcula el valor total del portafolio
+            // Calcular valor total del portafolio y otros datos
             let totalValue = 0;
-            const updatedPortfolio = PORTFOLIO_MOCK_DATA.map(asset => {
+            const updatedPortfolio = portfolioAssets.map(asset => {
                 const currentPrice = prices[asset.id]?.usd || 0;
                 const value = asset.balance * currentPrice;
                 totalValue += value;
-                const profitLoss = (currentPrice - asset.purchasePrice) * asset.balance;
+                
+                // Para simplificar, la ganancia/pérdida se omite por ahora, ya que necesitaría datos de precios de compra
+                const profitLoss = 0; 
                 return { ...asset, value, currentPrice, profitLoss };
             });
 
-            // Asigna porcentajes y renderiza
             const finalPortfolio = updatedPortfolio.map(asset => ({
                 ...asset,
                 allocation: totalValue > 0 ? asset.value / totalValue : 0,
-                risk: RISK_SCORES[asset.id] || 0
+                risk: RISK_SCORES[asset.id] || 70 // Riesgo alto por defecto si no está en la lista
             }));
 
-            // Calcula el score de riesgo ponderado del portafolio
             let weightedRisk = 0;
             if (totalValue > 0) {
                 weightedRisk = finalPortfolio.reduce((sum, asset) => sum + (asset.risk * asset.allocation), 0);
@@ -538,6 +591,7 @@
             updateRiskScore(Math.round(weightedRisk));
             renderPortfolio(finalPortfolio);
         }
+
 
         function getRiskLevelClass(score) {
             if (score < 40) return 'risk-low';
@@ -582,8 +636,9 @@
                 const item = document.createElement('div');
                 item.className = 'portfolio-item';
                 
-                const pnlClass = asset.profitLoss >= 0 ? 'profit' : 'loss';
-                const pnlText = asset.profitLoss >= 0 ? `+${fmtPrice(asset.profitLoss)}` : `${fmtPrice(asset.profitLoss)}`;
+                // La ganancia/pérdida se omite por ahora
+                const pnlClass = ''; 
+                const pnlText = '';
                 const riskClass = getRiskLevelClass(asset.risk);
                 const riskText = getRiskLevelDesc(asset.risk);
 
@@ -601,7 +656,7 @@
                     </div>
                     <div class="asset-percent-risk">
                         <span class="${riskClass}">${riskText}</span>
-                        <div class="profit-loss ${pnlClass}">(${pnlText})</div>
+                        <div class="profit-loss ${pnlClass}">${pnlText}</div>
                     </div>
                 `;
                 portfolioListEl.appendChild(item);
@@ -609,7 +664,6 @@
         }
         
         function updateRiskColors() {
-            // Esta función ahora solo llama a updateRiskScore con el valor actual
             const currentScore = parseInt(document.getElementById('score-number').textContent.split('/')[0].trim());
             if (!isNaN(currentScore)) {
                 updateRiskScore(currentScore);
@@ -623,6 +677,7 @@
         const walletDisplay = document.getElementById('walletAddress');
         const connectBtn = document.getElementById('connect-wallet');
         const switchBtn = document.getElementById('switch-base');
+        let currentAccount = null;
 
         async function connectWallet() {
             if (typeof window.ethereum === 'undefined') {
@@ -632,12 +687,13 @@
             try {
                 const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
                 if (accounts && accounts.length > 0) {
-                    const short = formatAddress(accounts[0]);
+                    currentAccount = accounts[0];
+                    const short = formatAddress(currentAccount);
                     walletDisplay.textContent = (getLang() === 'es' ? '✅ Wallet conectada: ' : '✅ Wallet connected: ') + short;
                     connectBtn.textContent = getLang() === 'es' ? '✅ Conectada' : '✅ Connected';
 
                     // NUEVO: Carga los datos del portafolio después de conectar
-                    fetchPortfolioData();
+                    fetchPortfolioData(currentAccount);
 
                 }
             } catch (err) {
@@ -658,10 +714,6 @@
             }
             try {
                 await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: net.chainId }] });
-                const accounts = await window.ethereum.request({ method: 'eth_accounts' });
-                if (accounts && accounts.length > 0) {
-                    walletDisplay.textContent = (getLang() === 'es' ? '✅ Wallet conectada: ' : '✅ Wallet connected: ') + formatAddress(accounts[0]);
-                }
                 alert(getLang() === 'es' ? '✅ Conectado a la red Base.' : '✅ Connected to Base network.');
             } catch (err) {
                 if (err && err.code === 4902) {
@@ -682,17 +734,22 @@
         if (window.ethereum) {
             window.ethereum.on && window.ethereum.on('accountsChanged', (accounts) => {
                 if (accounts && accounts.length) {
-                    walletDisplay.textContent = (getLang() === 'es' ? '✅ Wallet conectada: ' : '✅ Wallet connected: ') + formatAddress(accounts[0]);
+                    currentAccount = accounts[0];
+                    walletDisplay.textContent = (getLang() === 'es' ? '✅ Wallet conectada: ' : '✅ Wallet connected: ') + formatAddress(currentAccount);
                     connectBtn.textContent = getLang() === 'es' ? '✅ Conectada' : '✅ Connected';
-                    fetchPortfolioData();
+                    fetchPortfolioData(currentAccount);
                 } else {
+                    currentAccount = null;
                     walletDisplay.textContent = '';
                     connectBtn.textContent = getLang() === 'es' ? '🔗 Conectar Wallet' : '🔗 Connect Wallet';
                     document.getElementById('portfolio-list').innerHTML = `<p id="portfolio-msg" style="text-align:center;color:var(--muted)"><span data-es="Conecta tu wallet para ver tu portafolio." data-en="Connect your wallet to see your portfolio.">Conecta tu wallet para ver tu portafolio.</span></p>`;
+                    updateRiskScore(0);
                 }
             });
             window.ethereum.on && window.ethereum.on('chainChanged', (chainId) => {
-                // No es necesario recargar el portafolio en este caso, ya que los datos son simulados
+                if (currentAccount) {
+                    fetchPortfolioData(currentAccount);
+                }
             });
         }
         
@@ -704,7 +761,7 @@
         });
         
         translateAll();
-        updateRiskScore(0); // Score inicial 0
+        updateRiskScore(0);
     </script>
 </body>
 </html>
