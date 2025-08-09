@@ -1,740 +1,764 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>ScoreChain</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
-    <link rel="icon" type="image/png" href="./assets/logos/scorechain.png">
-    <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js"></script>
-    <style>
-        :root {
-            --bg: #0b0f1a;
-            --card: #0f1724;
-            --muted: #9aa4b2;
-            --accent: #00cfc1;
-            --accent-2: #ffce3d;
-            --danger: #ff4d4d;
-            --glass: rgba(255, 255, 255, 0.03);
-            --profit: #16c784;
-            --loss: #ea3943;
-        }
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ScoreChain</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="./assets/logos/scorechain.png">
+    <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js"></script>
+    <style>
+        /* ... Tu CSS anterior ... */
+        :root {
+            --bg: #0b0f1a;
+            --card: #0f1724;
+            --muted: #9aa4b2;
+            --accent: #00cfc1;
+            --accent-2: #ffce3d;
+            --danger: #ff4d4d;
+            --glass: rgba(255, 255, 255, 0.03);
+            --profit: #16c784;
+            --loss: #ea3943;
+        }
 
-        html, body {
-            height: 100%;
-            margin: 0;
-            background: var(--bg);
-            font-family: Inter, system-ui, Segoe UI, Roboto, Arial;
-            color: #e6eef8;
-        }
+        html, body {
+            height: 100%;
+            margin: 0;
+            background: var(--bg);
+            font-family: Inter, system-ui, Segoe UI, Roboto, Arial;
+            color: #e6eef8;
+        }
 
-        .wrap {
-            max-width: 980px;
-            margin: 28px auto;
-            padding: 18px;
-        }
+        .wrap {
+            max-width: 980px;
+            margin: 28px auto;
+            padding: 18px;
+        }
 
-        .card {
-            background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
-            border-radius: 14px;
-            padding: 20px;
-            box-shadow: 0 10px 30px rgba(2, 6, 23, 0.6);
-            border: 1px solid rgba(255, 255, 255, 0.03);
-        }
+        .card {
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
+            border-radius: 14px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(2, 6, 23, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.03);
+        }
 
-        .hdr {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 12px;
-            margin-bottom: 16px;
-        }
+        .hdr {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
 
-        .brand {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
 
-        .brand img {
-            width: 44px;
-            height: 44px;
-            border-radius: 8px;
-            background: #000;
-            padding: 6px;
-        }
+        .brand img {
+            width: 44px;
+            height: 44px;
+            border-radius: 8px;
+            background: #000;
+            padding: 6px;
+        }
 
-        .brand .title {
-            font-size: 18px;
-            font-weight: 700;
-        }
+        .brand .title {
+            font-size: 18px;
+            font-weight: 700;
+        }
 
-        .controls {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-        
-        @media (max-width: 767px) {
-            .hdr {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-        }
+        .controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        @media (max-width: 767px) {
+            .hdr {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
 
-        .lang-select {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            background: var(--glass);
-            padding: 6px 10px;
-            border-radius: 999px;
-            border: 1px solid rgba(255, 255, 255, 0.03);
-        }
+        .lang-select {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--glass);
+            padding: 6px 10px;
+            border-radius: 999px;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+        }
 
-        .lang-select select {
-            background: transparent;
-            border: 0;
-            color: #e6eef8;
-            font-weight: 600;
-            outline: none;
-        }
+        .lang-select select {
+            background: transparent;
+            border: 0;
+            color: #e6eef8;
+            font-weight: 600;
+            outline: none;
+        }
 
-        .btn {
-            background: linear-gradient(180deg, var(--accent), #00b2a9);
-            color: #031018;
-            padding: 8px 12px;
-            border-radius: 10px;
-            border: 0;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
+        .btn {
+            background: linear-gradient(180deg, var(--accent), #00b2a9);
+            color: #031018;
+            padding: 8px 12px;
+            border-radius: 10px;
+            border: 0;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
 
-        .btn:hover {
-            filter: brightness(1.2);
-        }
+        .btn:hover {
+            filter: brightness(1.2);
+        }
 
-        .btn.secondary {
-            background: linear-gradient(180deg, var(--accent-2), #ebb53b);
-            color: #081014;
-        }
+        .btn.secondary {
+            background: linear-gradient(180deg, var(--accent-2), #ebb53b);
+            color: #081014;
+        }
 
-        .wallet-status {
-            font-size: 13px;
-            color: var(--muted);
-            margin-left: 8px;
-        }
+        .wallet-status {
+            font-size: 13px;
+            color: var(--muted);
+            margin-left: 8px;
+        }
 
-        .grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 18px;
-            align-items: start;
-        }
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 18px;
+            align-items: start;
+        }
 
-        @media (min-width: 768px) {
-            .grid {
-                grid-template-columns: 1fr 1fr;
-            }
-        }
-        
-        @media (min-width: 768px) {
-            .controls {
-                flex-direction: row;
-            }
-        }
+        @media (min-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        
+        @media (min-width: 768px) {
+            .controls {
+                flex-direction: row;
+            }
+        }
 
-        .left {
-            min-height: 220px;
-        }
+        .left {
+            min-height: 220px;
+        }
 
-        .score-box {
-            background: rgba(255, 255, 255, 0.02);
-            padding: 16px;
-            border-radius: 12px;
-            margin-bottom: 14px;
-            transition: all 0.4s ease;
-        }
+        .score-box {
+            background: rgba(255, 255, 255, 0.02);
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 14px;
+            transition: all 0.4s ease;
+        }
 
-        .score-title {
-            font-size: 14px;
-            color: var(--muted);
-            margin-bottom: 6px;
-        }
+        .score-title {
+            font-size: 14px;
+            color: var(--muted);
+            margin-bottom: 6px;
+        }
 
-        .score-number {
-            font-weight: 800;
-            font-size: 32px;
-            letter-spacing: 0.6px;
-            transition: color 0.4s ease;
-        }
+        .score-number {
+            font-weight: 800;
+            font-size: 32px;
+            letter-spacing: 0.6px;
+            transition: color 0.4s ease;
+        }
 
-        .score-bar {
-            height: 12px;
-            border-radius: 999px;
-            background: var(--muted);
-            margin-top: 12px;
-            box-shadow: 0 4px 12px rgba(2, 6, 23, 0.6);
-            transition: background-color 0.4s ease, width 0.4s ease;
-        }
+        .score-bar {
+            height: 12px;
+            border-radius: 999px;
+            background: var(--muted);
+            margin-top: 12px;
+            box-shadow: 0 4px 12px rgba(2, 6, 23, 0.6);
+            transition: background-color 0.4s ease, width 0.4s ease;
+        }
 
-        .portfolio {
-            margin-top: 12px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
+        .portfolio {
+            margin-top: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
 
-        .portfolio-item {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 10px;
-            align-items: center;
-            padding: 10px;
-            border-radius: 10px;
-            background: rgba(255, 255, 255, 0.015);
-            border: 1px solid rgba(255, 255, 255, 0.02);
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-        
-        .portfolio-item.header {
-            font-size: 12px;
-            color: var(--muted);
-            background: transparent;
-            border: 0;
-            padding-bottom: 0;
-            margin-bottom: -10px;
-        }
-        .portfolio-item.header .asset-info { font-weight: 600; }
+        .portfolio-item {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+            align-items: center;
+            padding: 10px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.015);
+            border: 1px solid rgba(255, 255, 255, 0.02);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        
+        .portfolio-item.header {
+            font-size: 12px;
+            color: var(--muted);
+            background: transparent;
+            border: 0;
+            padding-bottom: 0;
+            margin-bottom: -10px;
+        }
+        .portfolio-item.header .asset-info { font-weight: 600; }
 
-        .portfolio-item:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(2, 6, 23, 0.8);
-        }
+        .portfolio-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(2, 6, 23, 0.8);
+        }
 
-        .asset-info {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-            font-weight: 700;
-        }
-        .asset-info .name-symbol { display: flex; flex-direction: column; }
-        .asset-info .name-symbol .symbol { font-size: 12px; color: var(--muted); }
-
-
-        .asset-value {
-            text-align: right;
-            font-weight: 700;
-        }
-        .asset-value .amount { font-size: 12px; color: var(--muted); }
-
-        .asset-percent-risk {
-            text-align: right;
-            color: var(--muted);
-            font-weight: 700;
-            font-size: 12px;
-        }
-        .asset-percent-risk .profit-loss { font-size: 12px; }
-        .asset-percent-risk .profit { color: var(--profit); }
-        .asset-percent-risk .loss { color: var(--loss); }
+        .asset-info {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            font-weight: 700;
+        }
+        .asset-info .name-symbol { display: flex; flex-direction: column; }
+        .asset-info .name-symbol .symbol { font-size: 12px; color: var(--muted); }
 
 
-        .asset-info img {
-            width: 28px;
-            height: 28px;
-            border-radius: 6px;
-        }
+        .asset-value {
+            text-align: right;
+            font-weight: 700;
+        }
+        .asset-value .amount { font-size: 12px; color: var(--muted); }
 
-        .risk-low { color: var(--accent); }
-        .risk-moderate { color: var(--accent-2); }
-        .risk-high { color: var(--danger); }
+        .asset-percent-risk {
+            text-align: right;
+            color: var(--muted);
+            font-weight: 700;
+            font-size: 12px;
+        }
+        .asset-percent-risk .profit-loss { font-size: 12px; }
+        .asset-percent-risk .profit { color: var(--profit); }
+        .asset-percent-risk .loss { color: var(--loss); }
 
-        .right {
-            display: flex;
-            flex-direction: column;
-            gap: 18px;
-        }
 
-        .edu-item {
-            padding: 18px;
-            background: var(--glass);
-            border-radius: 12px;
-            cursor: pointer;
-            border: 1px solid rgba(255, 255, 255, 0.02);
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
+        .asset-info img {
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+        }
 
-        .edu-item:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(2, 6, 23, 0.8);
-        }
+        .risk-low { color: var(--accent); }
+        .risk-moderate { color: var(--accent-2); }
+        .risk-high { color: var(--danger); }
 
-        .edu-title {
-            font-size: 16px;
-            font-weight: 700;
-            margin-bottom: 6px;
-        }
+        .right {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
 
-        .edu-desc {
-            font-size: 13px;
-            color: var(--muted);
-        }
+        .edu-item {
+            padding: 18px;
+            background: var(--glass);
+            border-radius: 12px;
+            cursor: pointer;
+            border: 1px solid rgba(255, 255, 255, 0.02);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
 
-        .coingecko-msg {
-            margin-top: 12px;
-            font-size: 13px;
-            color: var(--muted);
-        }
+        .edu-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(2, 6, 23, 0.8);
+        }
 
-        .footer {
-            margin-top: 16px;
-            font-size: 13px;
-            color: var(--muted);
-            text-align: center;
-        }
+        .edu-title {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
 
-        #base-msg {
-            font-size: 13px;
-            color: var(--muted);
-            margin-top: 12px;
-        }
-    </style>
+        .edu-desc {
+            font-size: 13px;
+            color: var(--muted);
+        }
+
+        .coingecko-msg {
+            margin-top: 12px;
+            font-size: 13px;
+            color: var(--muted);
+        }
+
+        .footer {
+            margin-top: 16px;
+            font-size: 13px;
+            color: var(--muted);
+            text-align: center;
+        }
+
+        #base-msg {
+            font-size: 13px;
+            color: var(--muted);
+            margin-top: 12px;
+        }
+    </style>
 </head>
 <body>
-    <div class="wrap">
-        <header class="hdr">
-            <div class="brand">
-                <img src="./assets/logos/scorechain.png" alt="ScoreChain logo" id="logo-img" />
-                <div>
-                    <div class="title" data-es="Score Financiero" data-en="Financial Score">Score Financiero</div>
-                    <div style="font-size:12px;color:var(--muted)" id="small-sub" data-es="Tu guía en cripto" data-en="Your crypto guide">Tu guía en cripto</div>
-                </div>
-            </div>
+    <div class="wrap">
+        <header class="hdr">
+            <div class="brand">
+                <img src="./assets/logos/scorechain.png" alt="ScoreChain logo" id="logo-img" />
+                <div>
+                    <div class="title" data-es="Score Financiero" data-en="Financial Score">Score Financiero</div>
+                    <div style="font-size:12px;color:var(--muted)" id="small-sub" data-es="Tu guía en cripto" data-en="Your crypto guide">Tu guía en cripto</div>
+                </div>
+            </div>
 
-            <div class="controls">
-                <div class="lang-select" title="Change language">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-globe-2"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/><path d="M12 2a14.5 14.5 0 0 1 8.5 2.5c2.3 2.3 3.5 6.4 2 9.5a14.5 14.5 0 0 1-20 0c-1.5-3.1-.3-7.2 2-9.5A14.5 14.5 0 0 1 12 2z"/></svg>
-                    <select id="lang-selector" aria-label="language">
-                        <option value="es">Español</option>
-                        <option value="en">English</option>
-                    </select>
-                </div>
-                <div style="display:flex;align-items:center;gap:8px">
-                    <button class="btn" id="connect-wallet" data-es="🔗 Conectar Wallet" data-en="🔗 Connect Wallet">🔗 Conectar Wallet</button>
-                    <button class="btn secondary" id="switch-base" data-es="↔️ Cambiar a Base" data-en="↔️ Switch to Base">↔️ Cambiar a Base</button>
-                </div>
-                <div class="wallet-status" id="walletAddress" aria-live="polite"></div>
-            </div>
-        </header>
+            <div class="controls">
+                <div class="lang-select" title="Change language">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-globe-2"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/><path d="M12 2a14.5 14.5 0 0 1 8.5 2.5c2.3 2.3 3.5 6.4 2 9.5a14.5 14.5 0 0 1-20 0c-1.5-3.1-.3-7.2 2-9.5A14.5 14.5 0 0 1 12 2z"/></svg>
+                    <select id="lang-selector" aria-label="language">
+                        <option value="es">Español</option>
+                        <option value="en">English</option>
+                    </select>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px">
+                    <button class="btn" id="connect-wallet" data-es="🔗 Conectar Wallet" data-en="🔗 Connect Wallet">🔗 Conectar Wallet</button>
+                    <button class="btn secondary" id="switch-base" data-es="↔️ Cambiar a Base" data-en="↔️ Switch to Base">↔️ Cambiar a Base</button>
+                </div>
+                <div class="wallet-status" id="walletAddress" aria-live="polite"></div>
+            </div>
+        </header>
 
-        <div class="grid">
-            <div class="left">
-                <section class="card score">
-                    <div class="score-box">
-                        <div class="score-title" data-es="Score Financiero" data-en="Financial Score">Score Financiero</div>
-                        <div class="score-number" id="score-number">...</div>
-                        <div class="score-bar" id="score-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
-                        <div style="margin-top:8px;font-size:13px;color:var(--muted)" id="score-desc" data-es="Conecta tu wallet para ver tu score." data-en="Connect your wallet to see your score.">Conecta tu wallet para ver tu score.</div>
-                    </div>
-                    
-                    <div class="score-box">
-                        <div class="score-title" data-es="Tu Portafolio" data-en="Your Portfolio">Tu Portafolio</div>
-                        <div class="portfolio" id="portfolio">
-                            <div class="portfolio-item header">
-                                <div class="asset-info" data-es="Moneda" data-en="Coin">Moneda</div>
-                                <div class="asset-value" data-es="Valor de Mercado" data-en="Market Value">Valor de Mercado</div>
-                                <div class="asset-percent-risk" data-es="Riesgo / P&L" data-en="Risk / P&L">Riesgo / P&L</div>
-                            </div>
-                            <div id="portfolio-list">
-                                <p id="portfolio-msg" style="text-align:center;color:var(--muted)">
-                                    <span data-es="Conecta tu wallet para ver tu portafolio." data-en="Connect your wallet to see your portfolio.">Conecta tu wallet para ver tu portafolio.</span>
-                                </p>
-                            </div>
-                        </div>
-                        <div class="coingecko-msg" id="cg-msg"></div>
-                    </div>
-                </section>
-            </div>
+        <div class="grid">
+            <div class="left">
+                <section class="card score">
+                    <div class="score-box">
+                        <div class="score-title" data-es="Score Financiero" data-en="Financial Score">Score Financiero</div>
+                        <div class="score-number" id="score-number">...</div>
+                        <div class="score-bar" id="score-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                        <div style="margin-top:8px;font-size:13px;color:var(--muted)" id="score-desc" data-es="Conecta tu wallet para ver tu score." data-en="Connect your wallet to see your score.">Conecta tu wallet para ver tu score.</div>
+                    </div>
+                    
+                    <div class="score-box">
+                        <div class="score-title" data-es="Tu Portafolio" data-en="Your Portfolio">Tu Portafolio</div>
+                        <div class="portfolio" id="portfolio">
+                            <div class="portfolio-item header">
+                                <div class="asset-info" data-es="Moneda" data-en="Coin">Moneda</div>
+                                <div class="asset-value" data-es="Valor de Mercado" data-en="Market Value">Valor de Mercado</div>
+                                <div class="asset-percent-risk" data-es="Riesgo / P&L" data-en="Risk / P&L">Riesgo / P&L</div>
+                            </div>
+                            <div id="portfolio-list">
+                                <p id="portfolio-msg" style="text-align:center;color:var(--muted)">
+                                    <span data-es="Conecta tu wallet para ver tu portafolio." data-en="Connect your wallet to see your portfolio.">Conecta tu wallet para ver tu portafolio.</span>
+                                </p>
+                            </div>
+                        </div>
+                        <div class="coingecko-msg" id="cg-msg"></div>
+                    </div>
+                </section>
+            </div>
 
-            <div class="right">
-                <section class="card">
-                    <h2>
-                        <span data-es="¿Cómo se calcula mi score?" data-en="How is my score calculated?">¿Cómo se calcula mi score?</span>
-                    </h2>
-                    <div class="edu-item">
-                        <div class="edu-title" data-es="Diversificación" data-en="Diversification">Diversificación</div>
-                        <div class="edu-desc" data-es="Cuanto más diversificado esté tu portafolio, menor será tu riesgo." data-en="The more diversified your portfolio is, the lower your risk.">Cuanto más diversificado esté tu portafolio, menor será tu riesgo.</div>
-                    </div>
-                    <div class="edu-item">
-                        <div class="edu-title" data-es="Volatilidad del Activo" data-en="Asset Volatility">Volatilidad del Activo</div>
-                        <div class="edu-desc" data-es="Activos muy volátiles (como monedas nuevas) aumentan tu puntaje de riesgo." data-en="Highly volatile assets (like new coins) increase your risk score.">Activos muy volátiles (como monedas nuevas) aumentan tu puntaje de riesgo.</div>
-                    </div>
-                    <div class="edu-item">
-                        <div class="edu-title" data-es="Historial del Protocolo" data-en="Protocol History">Historial del Protocolo</div>
-                        <div class="edu-desc" data-es="Los protocolos con más historia y auditorías se consideran menos riesgosos." data-en="Protocols with longer history and audits are considered less risky.">Los protocolos con más historia y auditorías se consideran menos riesgosos.</div>
-                    </div>
-                </section>
+            <div class="right">
+                <section class="card">
+                    <h2>
+                        <span data-es="¿Cómo se calcula mi score?" data-en="How is my score calculated?">¿Cómo se calcula mi score?</span>
+                    </h2>
+                    <div class="edu-item">
+                        <div class="edu-title" data-es="Diversificación" data-en="Diversification">Diversificación</div>
+                        <div class="edu-desc" data-es="Cuanto más diversificado esté tu portafolio, menor será tu riesgo." data-en="The more diversified your portfolio is, the lower your risk.">Cuanto más diversificado esté tu portafolio, menor será tu riesgo.</div>
+                    </div>
+                    <div class="edu-item">
+                        <div class="edu-title" data-es="Volatilidad del Activo" data-en="Asset Volatility">Volatilidad del Activo</div>
+                        <div class="edu-desc" data-es="Activos muy volátiles (como monedas nuevas) aumentan tu puntaje de riesgo." data-en="Highly volatile assets (like new coins) increase your risk score.">Activos muy volátiles (como monedas nuevas) aumentan tu puntaje de riesgo.</div>
+                    </div>
+                    <div class="edu-item">
+                        <div class="edu-title" data-es="Historial del Protocolo" data-en="Protocol History">Historial del Protocolo</div>
+                        <div class="edu-desc" data-es="Los protocolos con más historia y auditorías se consideran menos riesgosos." data-en="Protocols with longer history and audits are considered less risky.">Los protocolos con más historia y auditorías se consideran menos riesgosos.</div>
+                    </div>
+                </section>
 
-                <section class="card">
-                    <h2>
-                        <span data-es="Gestiona tu riesgo" data-en="Manage your risk">Gestiona tu riesgo</span>
-                    </h2>
-                    <div class="edu-item">
-                        <div class="edu-title" data-es="Rebalancea tu portafolio" data-en="Rebalance your portfolio">Rebalancea tu portafolio</div>
-                        <div class="edu-desc" data-es="Diversifica añadiendo activos estables o de baja volatilidad." data-en="Diversify by adding stable or low-volatility assets.">Diversifica añadiendo activos estables o de baja volatilidad.</div>
-                    </div>
-                    <div class="edu-item">
-                        <div class="edu-title" data-es="Asegura tus activos" data-en="Secure your assets">Asegura tus activos</div>
-                        <div class="edu-desc" data-es="Utiliza carteras de hardware y activa la autenticación de dos factores." data-en="Use hardware wallets and enable two-factor authentication.">Utiliza carteras de hardware y activa la autenticación de dos factores.</div>
-                    </div>
-                </section>
-            </div>
-        </div>
+                <section class="card">
+                    <h2>
+                        <span data-es="Gestiona tu riesgo" data-en="Manage your risk">Gestiona tu riesgo</span>
+                    </h2>
+                    <div class="edu-item">
+                        <div class="edu-title" data-es="Rebalancea tu portafolio" data-en="Rebalance your portfolio">Rebalancea tu portafolio</div>
+                        <div class="edu-desc" data-es="Diversifica añadiendo activos estables o de baja volatilidad." data-en="Diversify by adding stable or low-volatility assets.">Diversifica añadiendo activos estables o de baja volatilidad.</div>
+                    </div>
+                    <div class="edu-item">
+                        <div class="edu-title" data-es="Asegura tus activos" data-en="Secure your assets">Asegura tus activos</div>
+                        <div class="edu-desc" data-es="Utiliza carteras de hardware y activa la autenticación de dos factores." data-en="Use hardware wallets and enable two-factor authentication.">Utiliza carteras de hardware y activa la autenticación de dos factores.</div>
+                    </div>
+                </section>
+            </div>
+        </div>
 
-        <footer class="footer">
-            © <span id="year"></span> ScoreChain · <a href="privacy.html" style="color:var(--muted)">Privacy</a> · <a href="terms.html" style="color:var(--muted)">Terms</a>
-        </footer>
-    </div>
-    <script>
-        // ---------------------------
-        // CONFIG
-        // ---------------------------
-        const INFURA_API_KEY = '9fa8ada75524485e8b6075524e49c4f3';
-        const INFURA_URL = `https://base-mainnet.infura.io/v3/${INFURA_API_KEY}`;
-       
-        const TOKENS_ON_BASE = [
-            { id: 'weth', symbol: 'WETH', name: 'Wrapped Ether', address: '0x4200000000000000000000000000000000000006', decimals: 18, risk: 20 },
-            { id: 'usd-coin', symbol: 'USDC', name: 'USD Coin', address: '0x833589fCD6eDb6E08f4c7C32D4f767BfFD1Ca7B3', decimals: 6, risk: 5 },
-            { id: 'dai', symbol: 'DAI', name: 'Dai', address: '0x50c572591904a40875c7b39922572D8E09C2d4b9', decimals: 18, risk: 10 },
-            { id: 'aave', symbol: 'AAVE', name: 'Aave', address: '0x153A81c3c97D8618eB477A14a796850d99F44c1f', decimals: 18, risk: 60 },
-            { id: 'uniswap', symbol: 'UNI', name: 'Uniswap', address: '0x867825b154a1D8D27993a44d7324B35E170f3807', decimals: 18, risk: 55 },
-        ];
-       
-        const RISK_SCORES = {
-            'weth': 20, 
-            'usd-coin': 5, 
-            'dai': 10,
-            'aave': 60, 
-            'uniswap': 55,
-            'ethereum': 25, 
-        };
-       
-        const langSelector = document.getElementById('lang-selector');
-        const portfolioMsgEl = document.getElementById('portfolio-msg');
-       
-        function getLang() {
-            return langSelector?.value || 'es';
-        }
-       
-        function translateAll() {
-            document.querySelectorAll('[data-es]').forEach(el => {
-                el.textContent = el.getAttribute(`data-${getLang()}`);
-            });
-            updateCoinGeckoMsg();
-            updateRiskColors(); 
-        }
-       
-        document.getElementById('year').textContent = new Date().getFullYear();
-       
-        function fetchTokenData(coinId) {
-            return new Promise((resolve, reject) => {
-                const url = `https://api.coingecko.com/api/v3/coins/${coinId}?localization=false&tickers=false&market_data=true&community_data=false&developer_data=false&sparkline=false`;
-                fetch(url)
-                    .then(res => {
-                        if (!res.ok) throw new Error('CG error ' + res.status);
-                        return res.json();
-                    })
-                    .then(data => {
-                        resolve({
-                            id: data.id,
-                            name: data.name,
-                            symbol: data.symbol,
-                            logo: data.image.small,
-                            currentPrice: data.market_data.current_price.usd,
-                        });
-                    })
-                    .catch(err => {
-                        console.error(`Error fetching data for ${coinId}`, err);
-                        resolve(null);
-                    });
-            });
-        }
-       
-        function updateCoinGeckoMsg() {
-            const el = document.getElementById('cg-msg');
-            const lang = getLang();
-            const now = new Date();
-            const timeString = now.toLocaleTimeString();
-       
-            const texts = {
-                es: `Precios de CoinGecko a las ${timeString}.`,
-                en: `Prices from CoinGecko at ${timeString}.`
-            };
-            if (el) el.textContent = texts[lang];
-        }
-       
-        async function fetchPortfolioData(address) {
-            if (!address) {
-                console.error('No wallet address provided.');
-                return;
-            }
-            document.getElementById('portfolio-list').innerHTML = `<p style="text-align:center;color:var(--muted)">Cargando tu portafolio...</p>`;
-       
-            const provider = new ethers.providers.JsonRpcProvider(INFURA_URL);
-            
-            let ethBalanceWei = await provider.getBalance(address);
-            const ethBalance = ethers.utils.formatEther(ethBalanceWei);
-       
-            const portfolioPromises = TOKENS_ON_BASE.map(async token => {
-                const contract = new ethers.Contract(token.address, ["function balanceOf(address) view returns (uint256)"], provider);
-                const balanceWei = await contract.balanceOf(address);
-                const balance = ethers.utils.formatUnits(balanceWei, token.decimals);
-                
-                if (parseFloat(balance) > 0) {
-                    return { ...token, balance: parseFloat(balance) };
-                }
-                return null;
-            });
-       
-            let portfolioAssets = (await Promise.all(portfolioPromises)).filter(asset => asset !== null);
-       
-            if (parseFloat(ethBalance) > 0.001) {
-                portfolioAssets.unshift({
-                    id: 'ethereum', 
-                    symbol: 'ETH', 
-                    name: 'Ethereum', 
-                    balance: parseFloat(ethBalance),
-                });
-            }
-       
-            if (portfolioAssets.length === 0) {
-                document.getElementById('portfolio-list').innerHTML = `<p style="text-align:center;color:var(--muted)"><span data-es="No se encontraron activos en la red Base." data-en="No assets found on Base network.">No se encontraron activos en la red Base.</span></p>`;
-                updateRiskScore(0);
-                return;
-            }
-       
-            const tokenDataPromises = portfolioAssets.map(asset => fetchTokenData(asset.id));
-            const tokenDataResults = await Promise.all(tokenDataPromises);
-       
-            let totalValue = 0;
-            const updatedPortfolio = portfolioAssets.map(asset => {
-                const data = tokenDataResults.find(d => d && d.id === asset.id);
-                const currentPrice = data ? data.currentPrice : 0;
-                const logo = data ? data.logo : './assets/logos/default.png'; 
-                const value = asset.balance * currentPrice;
-                totalValue += value;
-                
-                const profitLoss = 0; 
-                return { ...asset, value, currentPrice, profitLoss, logo };
-            });
-       
-            const finalPortfolio = updatedPortfolio.map(asset => ({
-                ...asset,
-                allocation: totalValue > 0 ? asset.value / totalValue : 0,
-                risk: RISK_SCORES[asset.id] || 70 
-            }));
-       
-            let weightedRisk = 0;
-            if (totalValue > 0) {
-                weightedRisk = finalPortfolio.reduce((sum, asset) => sum + (asset.risk * asset.allocation), 0);
-            }
-            
-            updateRiskScore(Math.round(weightedRisk));
-            renderPortfolio(finalPortfolio);
-        }
-       
-        function getRiskLevelClass(score) {
-            if (score < 40) return 'risk-low';
-            if (score <= 70) return 'risk-moderate';
-            return 'risk-high';
-        }
-       
-        function getRiskLevelDesc(score) {
-            const lang = getLang();
-            if (score < 40) return lang === 'es' ? 'Riesgo: Bajo' : 'Risk: Low';
-            if (score <= 70) return lang === 'es' ? 'Riesgo: Moderado' : 'Risk: Moderate';
-            return lang === 'es' ? 'Riesgo: Alto' : 'Risk: High';
-        }
-       
-        function updateRiskScore(score) {
-            const riskBar = document.getElementById('score-bar');
-            const scoreDesc = document.getElementById('score-desc');
-            const scoreNumber = document.getElementById('score-number');
-            const lang = getLang();
-       
-            scoreNumber.textContent = `${score} / 100`;
-            riskBar.style.width = `${score}%`;
-       
-            if (score < 40) {
-                riskBar.style.background = 'var(--accent)';
-                scoreDesc.textContent = lang === 'es' ? 'Portafolio de bajo riesgo' : 'Low-risk portfolio';
-            } else if (score <= 70) {
-                riskBar.style.background = 'var(--accent-2)';
-                scoreDesc.textContent = lang === 'es' ? 'Portafolio de riesgo moderado' : 'Moderate-risk portfolio';
-            } else {
-                riskBar.style.background = 'var(--danger)';
-                scoreDesc.textContent = lang === 'es' ? 'Portafolio de alto riesgo' : 'High-risk portfolio';
-            }
-        }
-       
-        function fmtPrice(n) {
-            if (n === null || n === undefined) return '-';
-            const price = parseFloat(n);
-            if (price >= 1) {
-                return '$' + price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-            }
-            return '$' + price.toPrecision(4);
-        }
-       
-        function fmtPercent(n) {
-            return `${(n * 100).toFixed(2)}%`;
-        }
-       
-        function renderPortfolio(portfolio) {
-            const portfolioListEl = document.getElementById('portfolio-list');
-            portfolioListEl.innerHTML = ''; 
-            document.querySelector('.portfolio-item.header').style.display = 'grid';
-       
-            portfolio.forEach(asset => {
-                const item = document.createElement('div');
-                item.className = 'portfolio-item';
-                
-                const pnlClass = ''; 
-                const pnlText = '';
-                const riskClass = getRiskLevelClass(asset.risk);
-                const riskText = getRiskLevelDesc(asset.risk);
-       
-                item.innerHTML = `
-                    <div class="asset-info">
-                        <img src="${asset.logo || './assets/logos/default.png'}" alt="${asset.symbol}">
-                        <div class="name-symbol">
-                            <span class="asset-name">${asset.symbol.toUpperCase()}</span>
-                            <span class="symbol">${fmtPercent(asset.allocation)}</span>
-                        </div>
-                    </div>
-                    <div class="asset-value">
-                        <span>${fmtPrice(asset.value)}</span>
-                        <div class="amount">${asset.balance.toFixed(4)} ${asset.symbol.toUpperCase()}</div>
-                    </div>
-                    <div class="asset-percent-risk">
-                        <span class="${riskClass}">${riskText}</span>
-                        <div class="profit-loss ${pnlClass}">${pnlText}</div>
-                    </div>
-                `;
-                portfolioListEl.appendChild(item);
-            });
-        }
-       
-        function updateRiskColors() {
-            const currentScore = parseInt(document.getElementById('score-number').textContent.split('/')[0].trim());
-            if (!isNaN(currentScore)) {
-                updateRiskScore(currentScore);
-            }
-        }
-       
-        // ---------------------------
-        // WALLET / METAMASK
-        // ---------------------------
-        const walletDisplay = document.getElementById('walletAddress');
-        const connectBtn = document.getElementById('connect-wallet');
-        const switchBtn = document.getElementById('switch-base');
-        let currentAccount = null;
-       
-        function formatAddress(addr) {
-            if (!addr) return '';
-            return addr.slice(0, 6) + '...' + addr.slice(-4);
-        }
-       
-        async function connectWallet() {
-            if (typeof window.ethereum === 'undefined') {
-                alert(getLang() === 'es' ? 'MetaMask no está instalada.' : 'MetaMask is not installed.');
-                return;
-            }
-            try {
-                const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-                if (accounts && accounts.length > 0) {
-                    currentAccount = accounts[0];
-                    const short = formatAddress(currentAccount);
-                    walletDisplay.textContent = (getLang() === 'es' ? '✅ Wallet conectada: ' : '✅ Wallet connected: ') + short;
-                    connectBtn.textContent = getLang() === 'es' ? '✅ Conectada' : '✅ Connected';
-                    fetchPortfolioData(currentAccount);
-       
-                }
-            } catch (err) {
-                console.error('Connect error', err);
-                walletDisplay.textContent = getLang() === 'es' ? '❌ Error al conectar.' : '❌ Connection error.';
-            }
-        }
-       
-        const NETWORKS = {
-            base: {
-                chainId: '0x2105', 
-                chainName: 'Base Mainnet',
-                nativeCurrency: { name: 'ETH', symbol: 'ETH', decimals: 18 },
-                rpcUrls: ['https://mainnet.base.org'],
-                blockExplorerUrls: ['https://basescan.org'],
-            }
-        };
-       
-        async function switchToNetwork(networkKey) {
-            if (typeof window.ethereum === 'undefined') {
-                alert(getLang() === 'es' ? 'MetaMask no está instalada.' : 'MetaMask is not installed.');
-                return;
-            }
-            const net = NETWORKS[networkKey];
-            if (!net) {
-                console.error('Network not defined', networkKey);
-                return;
-            }
-            try {
-                await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: net.chainId }] });
-            } catch (err) {
-                if (err && err.code === 4902) {
-                    try {
-                        await window.ethereum.request({ method: 'wallet_addEthereumChain', params: [net] });
-                    } catch (addErr) {
-                        console.error('Add chain error', addErr);
-                    }
-                } else {
-                    console.error('Switch error', err);
-                }
-            }
-        }
-       
-        connectBtn.addEventListener('click', connectWallet);
-        switchBtn.addEventListener('click', () => switchToNetwork('base'));
-       
-        if (window.ethereum) {
-            window.ethereum.on && window.ethereum.on('accountsChanged', (accounts) => {
-                if (accounts && accounts.length) {
-                    currentAccount = accounts[0];
-                    walletDisplay.textContent = (getLang() === 'es' ? '✅ Wallet conectada: ' : '✅ Wallet connected: ') + formatAddress(currentAccount);
-                    connectBtn.textContent = getLang() === 'es' ? '✅ Conectada' : '✅ Connected';
-                    fetchPortfolioData(currentAccount);
-                } else {
-                    currentAccount = null;
-                    walletDisplay.textContent = '';
-                    connectBtn.textContent = getLang() === 'es' ? '🔗 Conectar Wallet' : '🔗 Connect Wallet';
-                    document.getElementById('portfolio-list').innerHTML = `<p id="portfolio-msg" style="text-align:center;color:var(--muted)"><span data-es="Conecta tu wallet para ver tu portafolio." data-en="Connect your wallet to see your portfolio.">Conecta tu wallet para ver tu portafolio.</span></p>`;
-                    updateRiskScore(0);
-                }
-            });
-            window.ethereum.on && window.ethereum.on('chainChanged', (chainId) => {
-                if (currentAccount) {
-                    fetchPortfolioData(currentAccount);
-                }
-            });
-        }
-       
-        langSelector.addEventListener('change', () => {
-            translateAll();
-        });
-       
-        translateAll();
-        updateRiskScore(0);
-    </script>
+        <footer class="footer">
+            © <span id="year"></span> ScoreChain · <a href="privacy.html" style="color:var(--muted)">Privacy</a> · <a href="terms.html" style="color:var(--muted)">Terms</a>
+        </footer>
+    </div>
+    <script>
+        // ---------------------------
+        // CONFIG
+        // ---------------------------
+        const INFURA_API_KEY = '9fa8ada75524485e8b6075524e49c4f3';
+        const INFURA_URL = `https://base-mainnet.infura.io/v3/${INFURA_API_KEY}`;
+
+        // Contratos de los tokens más populares en la red Base
+        const TOKENS_ON_BASE = [
+            { id: 'weth', symbol: 'WETH', name: 'Wrapped Ether', address: '0x4200000000000000000000000000000000000006', decimals: 18, risk: 20 },
+            { id: 'usd-coin', symbol: 'USDC', name: 'USD Coin', address: '0x833589fCD6eDb6E08f4c7C32D4f767BfFD1Ca7B3', decimals: 6, risk: 5 },
+            { id: 'dai', symbol: 'DAI', name: 'Dai', address: '0x50c572591904a40875c7b39922572D8E09C2d4b9', decimals: 18, risk: 10 },
+            { id: 'aave', symbol: 'AAVE', name: 'Aave', address: '0x153A81c3c97D8618eB477A14a796850d99F44c1f', decimals: 18, risk: 60 },
+            { id: 'uniswap', symbol: 'UNI', name: 'Uniswap', address: '0x867825b154a1D8D27993a44d7324B35E170f3807', decimals: 18, risk: 55 },
+        ];
+
+        // Mapeo para obtener ID de CoinGecko
+        const COINGECKO_ID_MAP = {
+            'weth': 'weth',
+            'usdc': 'usd-coin',
+            'dai': 'dai',
+            'aave': 'aave',
+            'uni': 'uniswap',
+        };
+
+        const RISK_SCORES = {
+            'weth': 20, // Bajo riesgo
+            'usd-coin': 5, // Muy bajo riesgo
+            'dai': 10,
+            'aave': 60, // Riesgo moderado-alto
+            'uniswap': 55, // Riesgo moderado-alto
+        };
+
+
+        // Helper: format address
+        function formatAddress(addr) {
+            if (!addr) return '';
+            return addr.slice(0, 6) + '...' + addr.slice(-4);
+        }
+
+        // Helper: format price nicely
+        function fmtPrice(n) {
+            if (n === null || n === undefined) return '-';
+            const price = parseFloat(n);
+            if (price >= 1) {
+                return '$' + price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            }
+            return '$' + price.toPrecision(4);
+        }
+
+        // Helper: format percentage
+        function fmtPercent(n) {
+            return `${(n * 100).toFixed(2)}%`;
+        }
+
+        // language utils
+        const langSelector = document.getElementById('lang-selector');
+        const portfolioMsgEl = document.getElementById('portfolio-msg');
+
+        function getLang() {
+            return langSelector?.value || 'es';
+        }
+
+        function translateAll() {
+            document.querySelectorAll('[data-es]').forEach(el => {
+                el.textContent = el.getAttribute(`data-${getLang()}`);
+            });
+            updateCoinGeckoMsg();
+            updateRiskColors(); 
+        }
+
+        document.getElementById('year').textContent = new Date().getFullYear();
+
+        // ---------------------------
+        // COINGECKO: fetch prices & update UI
+        // ---------------------------
+        async function loadCryptoData(coinIds) {
+            try {
+                const ids = coinIds.join(',');
+                if (ids === '') return {};
+                const url = `https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd`;
+                const res = await fetch(url);
+                if (!res.ok) throw new Error('CG error ' + res.status);
+                const data = await res.json();
+                updateCoinGeckoMsg();
+                return data;
+            } catch (err) {
+                console.error('Error loading CoinGecko', err);
+                return {};
+            }
+        }
+        
+        function getCoinGeckoLogoUrl(id) {
+            return `./assets/logos/${id}.png`; 
+        }
+
+        function updateCoinGeckoMsg() {
+            const el = document.getElementById('cg-msg');
+            const lang = getLang();
+            const now = new Date();
+            const timeString = now.toLocaleTimeString();
+
+            const texts = {
+                es: `Precios de CoinGecko a las ${timeString}.`,
+                en: `Prices from CoinGecko at ${timeString}.`
+            };
+            if (el) el.textContent = texts[lang];
+        }
+
+        // ---------------------------
+        // CALCULAR Y ACTUALIZAR PORTAFOLIO Y RIESGO
+        // ---------------------------
+        async function fetchPortfolioData(address) {
+            if (!address) {
+                console.error('No wallet address provided.');
+                return;
+            }
+            document.getElementById('portfolio-list').innerHTML = `<p style="text-align:center;color:var(--muted)">Cargando tu portafolio...</p>`;
+
+            // NUEVO: Conectar con Ethers.js
+            const provider = new ethers.providers.JsonRpcProvider(INFURA_URL);
+            
+            // 1. Obtener balance de ETH (native token)
+            let ethBalanceWei = await provider.getBalance(address);
+            const ethBalance = ethers.utils.formatEther(ethBalanceWei);
+
+            const portfolioPromises = TOKENS_ON_BASE.map(async token => {
+                const contract = new ethers.Contract(token.address, ["function balanceOf(address) view returns (uint256)"], provider);
+                const balanceWei = await contract.balanceOf(address);
+                const balance = ethers.utils.formatUnits(balanceWei, token.decimals);
+                
+                // Solo si el balance es > 0, lo agregamos al portafolio
+                if (parseFloat(balance) > 0) {
+                    return { ...token, balance: parseFloat(balance), id: COINGECKO_ID_MAP[token.symbol.toLowerCase()] };
+                }
+                return null;
+            });
+
+            // Esperar a que se completen todas las promesas y filtrar los nulos
+            let portfolioAssets = (await Promise.all(portfolioPromises)).filter(asset => asset !== null);
+
+            // Agregar el balance de ETH al portafolio si es mayor que 0
+            if (parseFloat(ethBalance) > 0.001) {
+                portfolioAssets.unshift({
+                    id: 'ethereum', 
+                    symbol: 'ETH', 
+                    name: 'Ethereum', 
+                    balance: parseFloat(ethBalance),
+                    risk: 25,
+                    // No hay una dirección de contrato para el ETH nativo
+                });
+            }
+
+            // Si no hay activos, mostrar un mensaje
+            if (portfolioAssets.length === 0) {
+                document.getElementById('portfolio-list').innerHTML = `<p style="text-align:center;color:var(--muted)">No se encontraron activos en la red Base.</p>`;
+                updateRiskScore(0);
+                return;
+            }
+
+            // Obtener precios de CoinGecko
+            const coinIds = portfolioAssets.map(c => c.id);
+            const prices = await loadCryptoData(coinIds);
+
+            // Calcular valor total del portafolio y otros datos
+            let totalValue = 0;
+            const updatedPortfolio = portfolioAssets.map(asset => {
+                const currentPrice = prices[asset.id]?.usd || 0;
+                const value = asset.balance * currentPrice;
+                totalValue += value;
+                
+                // Para simplificar, la ganancia/pérdida se omite por ahora, ya que necesitaría datos de precios de compra
+                const profitLoss = 0; 
+                return { ...asset, value, currentPrice, profitLoss };
+            });
+
+            const finalPortfolio = updatedPortfolio.map(asset => ({
+                ...asset,
+                allocation: totalValue > 0 ? asset.value / totalValue : 0,
+                risk: RISK_SCORES[asset.id] || 70 // Riesgo alto por defecto si no está en la lista
+            }));
+
+            let weightedRisk = 0;
+            if (totalValue > 0) {
+                weightedRisk = finalPortfolio.reduce((sum, asset) => sum + (asset.risk * asset.allocation), 0);
+            }
+            
+            updateRiskScore(Math.round(weightedRisk));
+            renderPortfolio(finalPortfolio);
+        }
+
+
+        function getRiskLevelClass(score) {
+            if (score < 40) return 'risk-low';
+            if (score <= 70) return 'risk-moderate';
+            return 'risk-high';
+        }
+
+        function getRiskLevelDesc(score) {
+            const lang = getLang();
+            if (score < 40) return lang === 'es' ? 'Riesgo: Bajo' : 'Risk: Low';
+            if (score <= 70) return lang === 'es' ? 'Riesgo: Moderado' : 'Risk: Moderate';
+            return lang === 'es' ? 'Riesgo: Alto' : 'Risk: High';
+        }
+
+        function updateRiskScore(score) {
+            const riskBar = document.getElementById('score-bar');
+            const scoreDesc = document.getElementById('score-desc');
+            const scoreNumber = document.getElementById('score-number');
+            const lang = getLang();
+
+            scoreNumber.textContent = `${score} / 100`;
+            riskBar.style.width = `${score}%`;
+
+            if (score < 40) {
+                riskBar.style.background = 'var(--accent)';
+                scoreDesc.textContent = lang === 'es' ? 'Portafolio de bajo riesgo' : 'Low-risk portfolio';
+            } else if (score <= 70) {
+                riskBar.style.background = 'var(--accent-2)';
+                scoreDesc.textContent = lang === 'es' ? 'Portafolio de riesgo moderado' : 'Moderate-risk portfolio';
+            } else {
+                riskBar.style.background = 'var(--danger)';
+                scoreDesc.textContent = lang === 'es' ? 'Portafolio de alto riesgo' : 'High-risk portfolio';
+            }
+        }
+
+        function renderPortfolio(portfolio) {
+            const portfolioListEl = document.getElementById('portfolio-list');
+            portfolioListEl.innerHTML = ''; 
+            document.querySelector('.portfolio-item.header').style.display = 'grid';
+
+            portfolio.forEach(asset => {
+                const item = document.createElement('div');
+                item.className = 'portfolio-item';
+                
+                const pnlClass = ''; 
+                const pnlText = '';
+                const riskClass = getRiskLevelClass(asset.risk);
+                const riskText = getRiskLevelDesc(asset.risk);
+
+                item.innerHTML = `
+                    <div class="asset-info">
+                        <img src="./assets/logos/${asset.symbol.toLowerCase()}.png" alt="${asset.symbol}">
+                        <div class="name-symbol">
+                            <span class="asset-name">${asset.symbol.toUpperCase()}</span>
+                            <span class="symbol">${fmtPercent(asset.allocation)}</span>
+                        </div>
+                    </div>
+                    <div class="asset-value">
+                        <span>${fmtPrice(asset.value)}</span>
+                        <div class="amount">${asset.balance.toFixed(4)} ${asset.symbol.toUpperCase()}</div>
+                    </div>
+                    <div class="asset-percent-risk">
+                        <span class="${riskClass}">${riskText}</span>
+                        <div class="profit-loss ${pnlClass}">${pnlText}</div>
+                    </div>
+                `;
+                portfolioListEl.appendChild(item);
+            });
+        }
+        
+        function updateRiskColors() {
+            const currentScore = parseInt(document.getElementById('score-number').textContent.split('/')[0].trim());
+            if (!isNaN(currentScore)) {
+                updateRiskScore(currentScore);
+            }
+        }
+
+
+        // ---------------------------
+        // WALLET / METAMASK
+        // ---------------------------
+        const walletDisplay = document.getElementById('walletAddress');
+        const connectBtn = document.getElementById('connect-wallet');
+        const switchBtn = document.getElementById('switch-base');
+        let currentAccount = null;
+
+        async function connectWallet() {
+            if (typeof window.ethereum === 'undefined') {
+                alert(getLang() === 'es' ? 'MetaMask no está instalada.' : 'MetaMask is not installed.');
+                return;
+            }
+            try {
+                const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                if (accounts && accounts.length > 0) {
+                    currentAccount = accounts[0];
+                    const short = formatAddress(currentAccount);
+                    walletDisplay.textContent = (getLang() === 'es' ? '✅ Wallet conectada: ' : '✅ Wallet connected: ') + short;
+                    connectBtn.textContent = getLang() === 'es' ? '✅ Conectada' : '✅ Connected';
+
+                    // Carga los datos del portafolio después de conectar
+                    fetchPortfolioData(currentAccount);
+
+                }
+            } catch (err) {
+                console.error('Connect error', err);
+                walletDisplay.textContent = getLang() === 'es' ? '❌ Error al conectar.' : '❌ Connection error.';
+            }
+        }
+
+        async function switchToNetwork(networkKey) {
+            if (typeof window.ethereum === 'undefined') {
+                alert(getLang() === 'es' ? 'MetaMask no está instalada.' : 'MetaMask is not installed.');
+                return;
+            }
+            const net = NETWORKS[networkKey];
+            if (!net) {
+                console.error('Network not defined', networkKey);
+                return;
+            }
+            try {
+                await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: net.chainId }] });
+                alert(getLang() === 'es' ? '✅ Conectado a la red Base.' : '✅ Connected to Base network.');
+            } catch (err) {
+                if (err && err.code === 4902) {
+                    try {
+                        await window.ethereum.request({ method: 'wallet_addEthereumChain', params: [net] });
+                    } catch (addErr) {
+                        console.error('Add chain error', addErr);
+                    }
+                } else {
+                    console.error('Switch error', err);
+                }
+            }
+        }
+
+        connectBtn.addEventListener('click', connectWallet);
+        switchBtn.addEventListener('click', () => switchToNetwork('base'));
+
+        if (window.ethereum) {
+            window.ethereum.on && window.ethereum.on('accountsChanged', (accounts) => {
+                if (accounts && accounts.length) {
+                    currentAccount = accounts[0];
+                    walletDisplay.textContent = (getLang() === 'es' ? '✅ Wallet conectada: ' : '✅ Wallet connected: ') + formatAddress(currentAccount);
+                    connectBtn.textContent = getLang() === 'es' ? '✅ Conectada' : '✅ Connected';
+                    fetchPortfolioData(currentAccount);
+                } else {
+                    currentAccount = null;
+                    walletDisplay.textContent = '';
+                    connectBtn.textContent = getLang() === 'es' ? '🔗 Conectar Wallet' : '🔗 Connect Wallet';
+                    document.getElementById('portfolio-list').innerHTML = `<p id="portfolio-msg" style="text-align:center;color:var(--muted)"><span data-es="Conecta tu wallet para ver tu portafolio." data-en="Connect your wallet to see your portfolio.">Conecta tu wallet para ver tu portafolio.</span></p>`;
+                    updateRiskScore(0);
+                }
+            });
+            window.ethereum.on && window.ethereum.on('chainChanged', (chainId) => {
+                if (currentAccount) {
+                    fetchPortfolioData(currentAccount);
+                }
+            });
+        }
+        
+        // ---------------------------
+        // INICIALIZACIÓN
+        // ---------------------------
+        langSelector.addEventListener('change', () => {
+            translateAll();
+        });
+        
+        translateAll();
+        updateRiskScore(0);
+    </script>
 </body>
 </html>
