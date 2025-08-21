@@ -423,14 +423,6 @@
             { id: 'uniswap', symbol: 'UNI', name: 'Uniswap', address: '0x867825b154a1D8D27993a44d7324B35E170f3807', decimals: 18, risk: 55 },
         ];
 
-        const COINGECKO_ID_MAP = {
-            'weth': 'weth',
-            'usdc': 'usd-coin',
-            'dai': 'dai',
-            'aave': 'aave',
-            'uni': 'uniswap',
-        };
-
         // ---------------------------
         // GLOBAL STATE & PROVIDER
         // ---------------------------
@@ -454,10 +446,6 @@
                 return '$' + price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
             }
             return '$' + price.toPrecision(4);
-        }
-
-        function fmtPercent(n) {
-            return `${(n * 100).toFixed(2)}%`;
         }
 
         // ---------------------------
@@ -533,12 +521,20 @@
                 alert('MetaMask no está instalado. Por favor, instálalo para continuar.');
                 return;
             }
+            
             try {
+                // Si la wallet ya está conectada, desconectamos
+                if (walletAddress) {
+                    walletAddress = null;
+                    location.reload();
+                    return;
+                }
+
                 provider = new ethers.providers.Web3Provider(window.ethereum);
                 const accounts = await provider.send('eth_requestAccounts', []);
                 signer = provider.getSigner();
                 walletAddress = accounts[0];
-                console.log("Wallet conectada:", walletAddress);
+                
                 displayWalletAddress(walletAddress);
 
                 const chainId = await signer.getChainId();
@@ -549,6 +545,7 @@
                     fetchPortfolio();
                 }
 
+                // Event Listeners para cambios
                 window.ethereum.on('accountsChanged', (newAccounts) => {
                     if (newAccounts.length > 0) {
                         walletAddress = newAccounts[0];
@@ -588,7 +585,6 @@
                 en: 'Disconnect'
             };
             walletBtn.textContent = texts[lang];
-            walletBtn.disabled = true;
         }
 
         function displayBaseMessage(isBaseNetwork) {
@@ -599,16 +595,15 @@
             if (isBaseNetwork) {
                 if (msgEl) msgEl.remove();
                 switchBtn.style.display = 'none';
-                return;
+            } else {
+                if (!msgEl) {
+                    const msg = document.createElement('p');
+                    msg.id = 'base-msg';
+                    msg.textContent = lang === 'es' ? 'No estás en la red de Base.' : 'You are not on the Base network.';
+                    document.querySelector('.controls').appendChild(msg);
+                }
+                switchBtn.style.display = 'inline-block';
             }
-
-            if (!msgEl) {
-                const msg = document.createElement('p');
-                msg.id = 'base-msg';
-                msg.textContent = lang === 'es' ? 'No estás en la red de Base.' : 'You are not on the Base network.';
-                document.querySelector('.controls').appendChild(msg);
-            }
-            switchBtn.style.display = 'inline-block';
         }
 
         async function switchToNetwork(network) {
@@ -653,13 +648,12 @@
                 const coinIds = TOKENS_ON_BASE.map(token => token.id).concat('ethereum');
                 const prices = await loadCryptoData(coinIds);
 
-                let totalValue = 0;
                 let assets = [];
 
+                // Obtener balance de ETH
                 const ethBalance = await provider.getBalance(walletAddress);
                 const ethValueUSD = parseFloat(ethers.utils.formatEther(ethBalance)) * (prices['ethereum']?.usd || 0);
                 if (ethBalance.gt(0)) {
-                    totalValue += ethValueUSD;
                     assets.push({
                         symbol: 'ETH',
                         name: 'Ethereum',
@@ -670,13 +664,13 @@
                     });
                 }
 
+                // Obtener balances de los tokens ERC-20
                 for (const token of TOKENS_ON_BASE) {
                     const tokenContract = new ethers.Contract(token.address, ["function balanceOf(address) view returns (uint256)"], provider);
                     const balance = await tokenContract.balanceOf(walletAddress);
                     if (balance.gt(0)) {
                         const formattedBalance = ethers.utils.formatUnits(balance, token.decimals);
                         const tokenValueUSD = parseFloat(formattedBalance) * (prices[token.id]?.usd || 0);
-                        totalValue += tokenValueUSD;
                         assets.push({
                             symbol: token.symbol,
                             name: token.name,
@@ -709,12 +703,12 @@
 
             for (const asset of assets) {
                 const logoUrl = await getCoinGeckoLogoUrl(asset.coingeckoId);
-
+                
                 const item = document.createElement('div');
                 item.classList.add('portfolio-item');
-
+                
                 const riskClass = asset.risk < 25 ? 'risk-low' : (asset.risk < 70 ? 'risk-moderate' : 'risk-high');
-
+                
                 item.innerHTML = `
                     <div class="asset-info">
                         <img src="${logoUrl}" alt="${asset.symbol}">
@@ -741,7 +735,7 @@
                 renderScore(0);
                 return;
             }
-
+            
             let totalRiskValue = 0;
             let totalPortfolioValue = 0;
 
@@ -790,8 +784,28 @@
 
         window.addEventListener('DOMContentLoaded', () => {
             translateElements();
+            checkAndConnectWallet();
         });
 
+        async function checkAndConnectWallet() {
+            if (typeof window.ethereum !== 'undefined' && window.ethereum.isMetaMask) {
+                const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+                if (accounts.length > 0) {
+                    walletAddress = accounts[0];
+                    displayWalletAddress(walletAddress);
+                    provider = new ethers.providers.Web3Provider(window.ethereum);
+                    signer = provider.getSigner();
+
+                    const chainId = await signer.getChainId();
+                    if (chainId !== 8453) {
+                        displayBaseMessage(false);
+                    } else {
+                        displayBaseMessage(true);
+                        fetchPortfolio();
+                    }
+                }
+            }
+        }
     </script>
 </body>
 </html>
